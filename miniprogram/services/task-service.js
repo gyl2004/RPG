@@ -189,14 +189,38 @@ class TaskService {
    */
   createTask(taskData) {
     try {
+      console.log('TaskService.createTask 被调用:', taskData);
+
       if (!taskData.title || !taskData.category || !taskData.difficulty) {
         return { success: false, error: '请填写完整的任务信息' };
       }
 
       const tasks = wx.getStorageSync('userTasks') || [];
+
+      // 检查是否有重复的任务（相同标题且在5秒内创建）
+      const now = Date.now();
+      const duplicateTask = tasks.find(task =>
+        task.title === taskData.title &&
+        (now - new Date(task.createdAt).getTime()) < 5000
+      );
+
+      if (duplicateTask) {
+        console.log('检测到重复任务，静默返回已存在的任务:', duplicateTask);
+        // 静默处理，返回已存在的任务作为成功结果
+        return {
+          success: true,
+          task: duplicateTask,
+          message: '任务创建成功',
+          isDuplicate: true
+        };
+      }
+
       const taskId = 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       const rewards = this.calculateTaskRewards(taskData);
-      
+
+      console.log('生成任务ID:', taskId);
+      console.log('当前任务数量:', tasks.length);
+
       const task = {
         id: taskId,
         title: taskData.title,
@@ -220,6 +244,9 @@ class TaskService {
 
       tasks.unshift(task);
       wx.setStorageSync('userTasks', tasks);
+
+      console.log('任务创建成功，新任务数量:', tasks.length);
+      console.log('创建的任务:', task);
 
       return {
         success: true,
@@ -269,19 +296,19 @@ class TaskService {
   getUserTasks(filter = {}) {
     try {
       let tasks = wx.getStorageSync('userTasks') || [];
-      
+
       if (filter.status) {
         tasks = tasks.filter(task => task.status === filter.status);
       }
-      
+
       if (filter.category) {
         tasks = tasks.filter(task => task.category === filter.category);
       }
-      
+
       if (filter.difficulty) {
         tasks = tasks.filter(task => task.difficulty === filter.difficulty);
       }
-      
+
       return tasks;
     } catch (error) {
       console.error('获取任务列表失败:', error);
@@ -293,19 +320,28 @@ class TaskService {
    * 更新任务状态
    */
   updateTaskStatus(taskId, status, additionalData = {}) {
+    console.log('🔧 TaskService.updateTaskStatus 被调用');
+    console.log('🔧 参数 - taskId:', taskId, 'status:', status, 'additionalData:', additionalData);
+
     try {
       const tasks = wx.getStorageSync('userTasks') || [];
+      console.log('🔧 当前任务总数:', tasks.length);
+
       const taskIndex = tasks.findIndex(task => task.id === taskId);
+      console.log('🔧 找到任务索引:', taskIndex);
 
       if (taskIndex === -1) {
+        console.error('❌ 任务不存在, taskId:', taskId);
         return { success: false, error: '任务不存在' };
       }
 
       const task = tasks[taskIndex];
       const oldStatus = task.status;
+      console.log('🔧 任务原状态:', oldStatus, '新状态:', status);
 
       task.status = status;
       task.updatedAt = new Date().toISOString();
+      console.log('🔧 任务状态已更新');
 
       if (status === 'in_progress' && oldStatus === 'pending') {
         task.startedAt = new Date().toISOString();
@@ -356,15 +392,20 @@ class TaskService {
 
       tasks[taskIndex] = task;
       wx.setStorageSync('userTasks', tasks);
+      console.log('🔧 任务数据已保存到本地存储');
 
-      return {
+      const result = {
         success: true,
         task: task,
         message: '任务状态更新成功'
       };
+      console.log('🔧 TaskService.updateTaskStatus 返回结果:', result);
+      return result;
     } catch (error) {
-      console.error('更新任务状态失败:', error);
-      return { success: false, error: '更新任务状态失败' };
+      console.error('💥 更新任务状态失败:', error);
+      const errorResult = { success: false, error: '更新任务状态失败' };
+      console.log('🔧 TaskService.updateTaskStatus 返回错误:', errorResult);
+      return errorResult;
     }
   }
 

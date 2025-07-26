@@ -71,26 +71,41 @@ class CharacterService {
    */
   async updateCharacter(characterData) {
     try {
-      this.currentCharacter = { ...this.currentCharacter, ...characterData };
+      console.log('🔄 更新角色数据:', characterData);
+      
+      // 获取当前角色数据
+      const currentCharacter = this.getCurrentCharacter();
+      if (!currentCharacter) {
+        console.error('❌ 当前角色数据不存在');
+        return false;
+      }
+
+      // 合并数据
+      this.currentCharacter = { ...currentCharacter, ...characterData };
 
       // 确保角色数据完整性
       this.currentCharacter = this.ensureCharacterDataIntegrity(this.currentCharacter);
 
+      console.log('🔄 更新后的角色数据:', this.currentCharacter);
+
       // 保存到本地存储
       wx.setStorageSync('characterInfo', this.currentCharacter);
+      console.log('✅ 角色数据已保存到本地存储');
 
       // 更新全局状态
       const app = getApp();
       if (app) {
         app.globalData.character = this.currentCharacter;
+        console.log('✅ 全局状态已更新');
 
         // 同步到云数据库
+        console.log('🌐 开始同步到云数据库');
         await this.syncToCloud(app);
       }
 
       return true;
     } catch (error) {
-      console.error('更新角色信息失败:', error);
+      console.error('❌ 更新角色信息失败:', error);
       return false;
     }
   }
@@ -100,25 +115,36 @@ class CharacterService {
    */
   async syncToCloud(app) {
     try {
+      console.log('🌐 开始云端同步检查');
       const cloudDB = app.globalData.cloudDB;
       const userInfo = app.globalData.userInfo;
 
-      if (!cloudDB || !userInfo || !userInfo.openid) {
-        console.log('ℹ️ 云数据库或用户信息不可用，跳过同步');
+      console.log('🌐 云数据库服务:', cloudDB ? '可用' : '不可用');
+      console.log('🌐 用户信息:', userInfo ? `openid: ${userInfo.openid}` : '不可用');
+
+      if (!cloudDB) {
+        console.log('ℹ️ 云数据库服务不可用，跳过同步');
+        return;
+      }
+
+      if (!userInfo || !userInfo.openid) {
+        console.log('ℹ️ 用户信息不可用，跳过同步');
         return;
       }
 
       // 同步角色数据到云端
+      console.log('🌐 调用云数据库保存角色数据');
       const result = await cloudDB.saveCharacter(this.currentCharacter, userInfo.openid);
+      console.log('🌐 云数据库返回结果:', result);
 
-      if (result.success) {
+      if (result && result.success) {
         console.log('✅ 角色数据同步到云端成功');
       } else {
-        console.error('❌ 角色数据同步到云端失败:', result.error);
+        console.error('❌ 角色数据同步到云端失败:', result ? result.error : '未知错误');
       }
 
     } catch (error) {
-      console.error('❌ 同步到云数据库失败:', error);
+      console.error('❌ 同步到云数据库异常:', error);
     }
   }
 
@@ -381,9 +407,14 @@ class CharacterService {
    * @param {number} expGain 获得的经验值
    * @returns {object} 升级结果
    */
-  addExperience(expGain) {
+  async addExperience(expGain) {
+    console.log('🎁 CharacterService.addExperience 被调用, expGain:', expGain);
     const character = this.getCurrentCharacter();
-    if (!character) return { success: false, error: '角色不存在' };
+    console.log('🎁 获取到的角色:', character);
+    if (!character) {
+      console.error('❌ 角色不存在');
+      return { success: false, error: '角色不存在' };
+    }
 
     const oldLevel = character.level || 1;
     const oldExp = character.experience || 0;
@@ -412,9 +443,16 @@ class CharacterService {
       updateData.availableSkillPoints = (character.availableSkillPoints || 0) + skillPoints;
     }
 
-    this.updateCharacter(updateData);
+    // 异步更新角色数据
+    const updateResult = await this.updateCharacter(updateData);
+    console.log('🎁 角色数据更新结果:', updateResult);
 
-    return {
+    if (!updateResult) {
+      console.error('❌ 角色数据更新失败');
+      return { success: false, error: '角色数据更新失败' };
+    }
+
+    const result = {
       success: true,
       leveledUp,
       oldLevel,
@@ -424,6 +462,9 @@ class CharacterService {
       skillPoints,
       newExp
     };
+
+    console.log('🎁 addExperience 返回结果:', result);
+    return result;
   }
 
   /**
@@ -453,12 +494,18 @@ class CharacterService {
       return { success: false, error: '属性值已达上限' };
     }
 
-    // 更新属性
+    // 更新属性 - 正确处理嵌套对象
+    const updatedAttributes = {
+      ...character.attributes,
+      [attributeName]: newValue
+    };
+    
     const updateData = {
-      [`attributes.${attributeName}`]: newValue,
+      attributes: updatedAttributes,
       availableAttributePoints: availablePoints - points
     };
 
+    console.log('🎯 分配属性点 - 更新数据:', updateData);
     this.updateCharacter(updateData);
 
     return {

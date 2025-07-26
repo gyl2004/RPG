@@ -1,5 +1,4 @@
 // 现实世界RPG首页
-import { checkLoginAndRedirect, getCurrentUser, getCurrentCharacter } from '../../utils/auth-helper.js';
 
 Page({
   data: {
@@ -12,77 +11,257 @@ Page({
       expPercent: 0,
       class: '新手冒险者'
     },
-    todayTasks: [
-      {
-        id: 1,
-        title: '晨间锻炼30分钟',
-        experience: 50,
-        completed: false
-      },
-      {
-        id: 2,
-        title: '阅读技术文章',
-        experience: 30,
-        completed: true
-      },
-      {
-        id: 3,
-        title: '学习新技能',
-        experience: 40,
-        completed: false
-      }
-    ],
+    todayTasks: [],
     todayHabits: [],
     maxStreak: 7
   },
   onLoad: function() {
-    // 检查登录状态
-    if (!checkLoginAndRedirect('/pages/index/index')) {
-      return;
-    }
-
-    this.loadUserInfo();
-    this.loadCurrentUser();
-    this.calculateExpPercent();
-    this.loadTodayHabits();
+    console.log('🏠 首页 onLoad 被调用');
+    this.loadTodayData();
   },
 
   onShow: function() {
-    // 每次显示时检查登录状态
-    if (!checkLoginAndRedirect('/pages/index/index')) {
+    console.log('🏠 首页 onShow 被调用');
+    
+    // 检查登录状态
+    const app = getApp();
+    if (!app.globalData.isLoggedIn) {
+      console.log('🏠 用户未登录，重定向到登录页面');
+      wx.redirectTo({
+        url: '/pages/login/login'
+      });
       return;
     }
 
+    console.log('🏠 用户已登录，开始加载数据');
+    // 重新加载数据，以获取最新状态
     this.loadTodayData();
     this.checkRandomEvents();
   },
 
+  /**
+   * 获取任务服务
+   */
+  getTaskService() {
+    try {
+      return require('../../services/task-service.js');
+    } catch (error) {
+      console.error('获取任务服务失败:', error);
+      return null;
+    }
+  },
+
+  /**
+   * 获取习惯服务
+   */
+  getHabitService() {
+    try {
+      return require('../../services/habit-service.js');
+    } catch (error) {
+      console.error('获取习惯服务失败:', error);
+      return null;
+    }
+  },
+
+  /**
+   * 加载今日数据
+   */
+  loadTodayData() {
+    console.log('🏠 加载首页今日数据');
+    
+    try {
+      this.loadUserInfo();
+      this.loadTodayTasks();
+      this.loadTodayHabits();
+      this.calculateExpPercent();
+      
+      // 调试：检查任务服务状态
+      this.debugTaskService();
+    } catch (error) {
+      console.error('🏠 加载今日数据失败:', error);
+    }
+  },
+
+  /**
+   * 加载今日任务
+   */
+  loadTodayTasks() {
+    try {
+      console.log('🏠 加载今日任务');
+      
+      const taskService = this.getTaskService();
+      if (!taskService) {
+        console.error('❌ 任务服务不可用');
+        return;
+      }
+
+      // 直接检查本地存储
+      const storedTasks = wx.getStorageSync('userTasks') || [];
+      console.log('🏠 本地存储的任务:', storedTasks);
+      console.log('🏠 任务数量:', storedTasks.length);
+
+      // 获取所有任务
+      const allTasks = taskService.getUserTasks();
+      console.log('🏠 获取到的所有任务:', allTasks);
+      console.log('🏠 任务数量:', allTasks.length);
+
+      if (allTasks.length === 0) {
+        console.log('⚠️ 没有任务数据，设置空数组');
+        this.setData({
+          todayTasks: []
+        });
+        return;
+      }
+
+      // 打印每个任务的状态
+      allTasks.forEach((task, index) => {
+        console.log(`🏠 任务${index + 1}: ${task.title} - 状态: ${task.status}`);
+      });
+
+      // 筛选今日任务（状态为pending或in_progress的任务）
+      const todayTasks = allTasks.filter(task => {
+        const isToday = task.status === 'pending' || task.status === 'in_progress';
+        console.log(`🏠 任务 "${task.title}" 状态: ${task.status}, 是否今日任务: ${isToday}`);
+        return isToday;
+      }).slice(0, 5); // 只显示前5个任务
+
+      console.log('🏠 筛选后的今日任务:', todayTasks);
+
+      // 转换任务数据格式以适配首页显示
+      const formattedTasks = todayTasks.map(task => ({
+        id: task.id,
+        title: task.title,
+        experience: task.rewards?.experience || 0,
+        completed: task.status === 'completed',
+        status: task.status,
+        statusText: this.getTaskStatusText(task.status),
+        priority: task.priority || 'medium'
+      }));
+
+      console.log('🏠 格式化后的任务:', formattedTasks);
+
+      this.setData({
+        todayTasks: formattedTasks
+      });
+
+    } catch (error) {
+      console.error('❌ 加载今日任务失败:', error);
+    }
+  },
+
+  /**
+   * 调试任务服务
+   */
+  debugTaskService() {
+    try {
+      console.log('🔍 调试任务服务');
+      
+      // 检查本地存储
+      const userTasks = wx.getStorageSync('userTasks');
+      console.log('🔍 本地存储 userTasks:', userTasks);
+      console.log('🔍 userTasks 类型:', typeof userTasks);
+      console.log('🔍 userTasks 是否为数组:', Array.isArray(userTasks));
+      
+      // 检查任务服务
+      const taskService = this.getTaskService();
+      console.log('🔍 任务服务:', taskService);
+      
+      if (taskService) {
+        console.log('🔍 任务服务方法:', Object.keys(taskService));
+        
+        // 测试获取任务
+        const tasks = taskService.getUserTasks();
+        console.log('🔍 服务返回的任务:', tasks);
+        console.log('🔍 任务数量:', tasks ? tasks.length : 'null');
+      }
+      
+    } catch (error) {
+      console.error('🔍 调试任务服务失败:', error);
+    }
+  },
+
+  /**
+   * 获取任务状态文本
+   */
+  getTaskStatusText(status) {
+    const statusMap = {
+      'pending': '待开始',
+      'in_progress': '进行中',
+      'completed': '已完成',
+      'failed': '已失败',
+      'cancelled': '已取消'
+    };
+    return statusMap[status] || '未知';
+  },
+
+  /**
+   * 点击任务项，跳转到任务详情
+   */
+  onTaskTap(e) {
+    const taskId = e.currentTarget.dataset.id;
+    console.log('🏠 点击任务，ID:', taskId);
+    
+    if (taskId) {
+      wx.navigateTo({
+        url: `/pages/task-detail/task-detail?id=${taskId}`
+      });
+    }
+  },
+
+
+
   // 加载用户信息
   loadUserInfo: function() {
-    const user = getCurrentUser();
-    const character = getCurrentCharacter();
+    try {
+      const app = getApp();
+      const user = app.globalData.userInfo || wx.getStorageSync('userInfo');
+      const character = app.globalData.character || wx.getStorageSync('characterInfo');
 
-    if (user && character) {
-      this.setData({
-        userInfo: user,
-        character: character
-      });
-    } else {
-      // 如果没有用户信息，重定向到登录页面
-      checkLoginAndRedirect('/pages/index/index');
+      console.log('🏠 加载用户信息:', { user, character });
+
+      if (user && character) {
+        this.setData({
+          userInfo: user,
+          character: character
+        });
+      } else {
+        console.log('⚠️ 用户信息不完整，重定向到登录页面');
+        wx.redirectTo({
+          url: '/pages/login/login'
+        });
+      }
+    } catch (error) {
+      console.error('❌ 加载用户信息失败:', error);
     }
   },
 
   // 加载当前用户信息
   loadCurrentUser: function() {
     try {
-      const userService = require('../../services/user-service.js');
+      const userService = this.getUserService();
+      if (!userService) {
+        console.error('❌ 用户服务不可用');
+        return;
+      }
+      
       const currentUser = userService.getCurrentUser();
       this.setData({
         currentUser: currentUser
       });
     } catch (error) {
-      console.error('加载当前用户失败:', error);
+      console.error('❌ 加载当前用户失败:', error);
+    }
+  },
+
+  /**
+   * 获取用户服务
+   */
+  getUserService() {
+    try {
+      return require('../../services/user-service.js');
+    } catch (error) {
+      console.error('获取用户服务失败:', error);
+      return null;
     }
   },
 
@@ -95,22 +274,23 @@ Page({
     });
   },
 
-  // 加载今日数据
-  loadTodayData: function() {
-    // 重新计算经验百分比
-    this.calculateExpPercent();
 
-    // 重新加载今日习惯
-    this.loadTodayHabits();
-  },
 
   /**
    * 加载今日习惯
    */
   loadTodayHabits() {
     try {
-      const habitService = require('../../services/habit-service.js');
+      console.log('🏠 加载今日习惯');
+      
+      const habitService = this.getHabitService();
+      if (!habitService) {
+        console.error('❌ 习惯服务不可用');
+        return;
+      }
+      
       const habits = habitService.getUserHabits({ status: 'active' });
+      console.log('🏠 获取到的习惯:', habits);
 
       // 只显示前3个活跃习惯
       const todayHabits = habits.slice(0, 3).map(habit => {
@@ -130,22 +310,32 @@ Page({
         Math.max(max, habit.longestStreak), 0
       );
 
+      console.log('🏠 今日习惯:', todayHabits);
+      console.log('🏠 最大连续天数:', maxStreak);
+
       this.setData({
         todayHabits,
         maxStreak
       });
     } catch (error) {
-      console.error('加载今日习惯失败:', error);
+      console.error('❌ 加载今日习惯失败:', error);
     }
   },
 
   // 切换习惯完成状态
   toggleHabit: function(e) {
     const habitId = e.currentTarget.dataset.id;
+    console.log('🏠 切换习惯状态:', habitId);
 
     try {
-      const habitService = require('../../services/habit-service.js');
+      const habitService = this.getHabitService();
+      if (!habitService) {
+        wx.showToast({ title: '服务不可用', icon: 'error' });
+        return;
+      }
+      
       const result = habitService.checkInHabit(habitId);
+      console.log('🏠 习惯打卡结果:', result);
 
       if (result.success) {
         wx.showToast({

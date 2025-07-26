@@ -1,6 +1,4 @@
 // 角色页面
-import { checkLoginAndRedirect, getCurrentUser, getCurrentCharacter } from '../../utils/auth-helper.js';
-import characterService from '../../services/character-service.js';
 
 Page({
   data: {
@@ -24,16 +22,58 @@ Page({
   },
 
   onLoad: function() {
+    console.log('📄 角色页面 onLoad');
     this.loadCharacterData();
   },
 
   onShow: function() {
+    console.log('📄 角色页面 onShow');
     // 检查登录状态
-    if (!checkLoginAndRedirect('/pages/character/character')) {
+    const app = getApp();
+    if (!app.globalData.isLoggedIn) {
+      wx.redirectTo({
+        url: '/pages/login/login'
+      });
       return;
     }
-
+    
+    // 重新加载角色数据，以获取最新状态
     this.loadCharacterData();
+  },
+
+  /**
+   * 获取角色服务
+   */
+  getCharacterService() {
+    try {
+      return require('../../services/character-service.js');
+    } catch (error) {
+      console.error('获取角色服务失败:', error);
+      return null;
+    }
+  },
+
+  /**
+   * 安全调用角色服务方法
+   */
+  safeCallCharacterService(methodName, ...args) {
+    try {
+      const characterService = this.getCharacterService();
+      if (!characterService) {
+        console.warn(`角色服务不可用，无法调用 ${methodName}`);
+        return null;
+      }
+      
+      if (typeof characterService[methodName] !== 'function') {
+        console.warn(`角色服务方法 ${methodName} 不存在`);
+        return null;
+      }
+      
+      return characterService[methodName](...args);
+    } catch (error) {
+      console.error(`调用角色服务方法 ${methodName} 失败:`, error);
+      return null;
+    }
   },
 
   /**
@@ -41,19 +81,36 @@ Page({
    */
   async loadCharacterData() {
     try {
+      console.log('🔄 开始加载角色数据');
       this.setData({ loading: true });
 
-      const character = getCurrentCharacter();
-      const user = getCurrentUser();
+      // 获取角色服务
+      const characterService = this.getCharacterService();
+      if (!characterService) {
+        console.error('❌ 角色服务不可用');
+        this.setData({ loading: false });
+        return;
+      }
+      
+      // 从多个来源获取角色数据
+      const app = getApp();
+      let character = app.globalData.character || 
+                     wx.getStorageSync('characterInfo') || 
+                     wx.getStorageSync('character');
+      
+      const user = app.globalData.userInfo || wx.getStorageSync('userInfo');
+      
+      console.log('🔄 获取到的角色数据:', character);
+      console.log('🔄 获取到的用户数据:', user);
 
       if (character) {
         // 计算角色相关数据
-        const powerLevel = characterService.calculatePowerLevel(character);
-        const expProgress = characterService.calculateExpProgress(character);
-        const characterTitle = characterService.getCharacterTitle(character);
-        const attributesInfo = characterService.getAllAttributesInfo();
-        const expToNextLevel = characterService.getExpRemaining(character);
-        const levelTier = characterService.getLevelTier(character.level || 1);
+        const powerLevel = this.safeCallCharacterService('calculatePowerLevel', character) || 0;
+        const expProgress = this.safeCallCharacterService('calculateExpProgress', character) || 0;
+        const characterTitle = this.safeCallCharacterService('getCharacterTitle', character) || '新手冒险者';
+        const attributesInfo = this.safeCallCharacterService('getAllAttributesInfo') || {};
+        const expToNextLevel = this.safeCallCharacterService('getExpRemaining', character) || 0;
+        const levelTier = this.safeCallCharacterService('getLevelTier', character.level || 1) || { name: '新手', color: '#gray' };
 
         // 确保角色有属性数据
         if (!character.attributes) {
@@ -67,20 +124,35 @@ Page({
           };
         }
 
+        // 创建默认属性信息
+        const defaultAttributes = {
+          strength: { name: '力量', icon: '💪', color: '#ef4444', description: '影响体力和耐力' },
+          intelligence: { name: '智力', icon: '🧠', color: '#3b82f6', description: '影响学习和思考能力' },
+          charisma: { name: '魅力', icon: '✨', color: '#f59e0b', description: '影响社交和领导力' },
+          creativity: { name: '创造力', icon: '🎨', color: '#8b5cf6', description: '影响创新和艺术能力' },
+          discipline: { name: '纪律性', icon: '🎯', color: '#10b981', description: '影响自控和执行力' },
+          vitality: { name: '活力', icon: '⚡', color: '#f97316', description: '影响精力和恢复力' }
+        };
+
         // 转换属性信息为数组格式，便于在WXML中遍历
-        const attributesList = Object.keys(attributesInfo).map(key => ({
+        const attributesList = Object.keys(defaultAttributes).map(key => ({
           id: key,
-          ...attributesInfo[key],
+          ...defaultAttributes[key],
           value: character.attributes[key] || 0
         }));
 
         // 调试信息
-        console.log('属性信息:', attributesInfo);
+        console.log('属性信息:', defaultAttributes);
         console.log('属性列表:', attributesList);
         console.log('角色属性:', character.attributes);
 
-        // 临时给用户一些属性点用于测试
-        const availablePoints = character.availableAttributePoints || 5;
+        // 获取可用属性点
+        const availablePoints = character.availableAttributePoints || 0;
+
+        console.log('🔄 设置页面数据:');
+        console.log('  - 角色数据:', character);
+        console.log('  - 属性列表:', attributesList);
+        console.log('  - 可用属性点:', availablePoints);
 
         this.setData({
           character,
@@ -94,6 +166,8 @@ Page({
           expToNextLevel,
           levelTier
         });
+        
+        console.log('✅ 页面数据设置完成');
       }
 
       this.setData({ loading: false });
@@ -143,17 +217,34 @@ Page({
    * 分配属性点
    */
   async allocateAttribute(e) {
+    // 防重复调用
+    if (this.allocatingAttribute) {
+      console.log('⚠️ 属性分配中，忽略重复调用');
+      return;
+    }
+    
+    this.allocatingAttribute = true;
+    
     const attributeName = e.currentTarget.dataset.attribute;
     const points = parseInt(e.currentTarget.dataset.points) || 1;
 
-    console.log('分配属性:', attributeName, '点数:', points);
-    console.log('可用属性:', Object.keys(characterService.attributes));
+    console.log('🎯 通过allocateAttribute分配属性:', attributeName, '点数:', points);
 
     try {
+      // 获取角色服务
+      const characterService = this.getCharacterService();
+      if (!characterService) {
+        wx.showToast({ title: '服务不可用', icon: 'error' });
+        return;
+      }
+      
       // 确保characterService有最新的角色数据
-      characterService.currentCharacter = this.data.character;
+      if (characterService.currentCharacter) {
+        characterService.currentCharacter = this.data.character;
+      }
 
-      const result = characterService.allocateAttributePoints(attributeName, points);
+      const result = this.safeCallCharacterService('allocateAttributePoints', attributeName, points) || 
+        { success: false, error: '方法不可用' };
 
       if (result.success) {
         wx.showToast({
@@ -176,6 +267,9 @@ Page({
         title: '操作失败',
         icon: 'error'
       });
+    } finally {
+      // 重置防重复调用标记
+      this.allocatingAttribute = false;
     }
   },
 
@@ -184,12 +278,19 @@ Page({
    */
   async testGainExp() {
     try {
-      const result = characterService.addExperience(150);
+      const characterService = this.getCharacterService();
+      if (!characterService) {
+        wx.showToast({ title: '服务不可用', icon: 'error' });
+        return;
+      }
+      
+      const result = await characterService.addExperience(150);
 
       if (result.success) {
         if (result.leveledUp) {
           // 获取升级奖励
-          const rewards = characterService.getLevelUpRewards(result.newLevel);
+          const rewards = this.safeCallCharacterService('getLevelUpRewards', result.newLevel) || 
+            { attributePoints: 2, skillPoints: 1 };
 
           // 显示升级动画
           this.setData({
@@ -253,12 +354,22 @@ Page({
       const randomTask = taskTypes[Math.floor(Math.random() * taskTypes.length)];
       const randomDifficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
 
-      const expGain = characterService.calculateTaskExp(randomTask, randomDifficulty, this.data.character);
-      const result = characterService.addExperience(expGain);
+      const characterService = this.getCharacterService();
+      if (!characterService) {
+        wx.showToast({ title: '服务不可用', icon: 'error' });
+        return;
+      }
+      
+      // 简化经验值计算
+      const expMultiplier = { easy: 1, normal: 1.5, hard: 2, expert: 3 };
+      const expGain = Math.floor(50 * (expMultiplier[randomDifficulty] || 1));
+      
+      const result = await characterService.addExperience(expGain);
 
       if (result.success) {
         if (result.leveledUp) {
-          const rewards = characterService.getLevelUpRewards(result.newLevel);
+          const rewards = this.safeCallCharacterService('getLevelUpRewards', result.newLevel) || 
+            { attributePoints: 2, skillPoints: 1 };
           this.setData({
             showLevelUpModal: true,
             levelUpData: { ...result, rewards }
@@ -295,7 +406,14 @@ Page({
 
       if (!result.confirm) return;
 
-      const resetResult = characterService.resetAttributePoints('full');
+      const characterService = this.getCharacterService();
+      if (!characterService) {
+        wx.showToast({ title: '服务不可用', icon: 'error' });
+        return;
+      }
+      
+      const resetResult = this.safeCallCharacterService('resetAttributePoints', 'full') || 
+        { success: false, error: '方法不可用' };
 
       if (resetResult.success) {
         wx.showToast({
@@ -348,26 +466,40 @@ Page({
     const currentValue = character.attributes[attribute] || 0;
 
     if (action === 'increase') {
-      // 增加属性
+      // 增加属性 - 使用角色服务进行持久化
       if (this.data.availablePoints > 0 && currentValue < 100) {
-        character.attributes[attribute] = currentValue + 1;
+        console.log('🎯 通过adjustAttribute增加属性:', attribute);
+        
+        // 调用角色服务分配属性点
+        const characterService = this.getCharacterService();
+        if (!characterService) {
+          wx.showToast({ title: '服务不可用', icon: 'error' });
+          return;
+        }
+        
+        // 确保characterService有最新的角色数据
+        if (characterService.currentCharacter) {
+          characterService.currentCharacter = this.data.character;
+        }
 
-        // 更新attributesList
-        const attributesList = this.data.attributesList.map(attr => {
-          if (attr.id === attribute) {
-            return { ...attr, value: currentValue + 1 };
-          }
-          return attr;
-        });
+        const result = this.safeCallCharacterService('allocateAttributePoints', attribute, 1) || 
+          { success: false, error: '方法不可用' };
 
-        this.setData({
-          character: character,
-          attributesList: attributesList,
-          availablePoints: this.data.availablePoints - 1
-        });
-
-        // 更新战斗力
-        this.updatePowerLevel();
+        if (result.success) {
+          // 重新加载数据以反映变化
+          this.loadCharacterData();
+          
+          wx.showToast({
+            title: '属性提升成功',
+            icon: 'success',
+            duration: 1000
+          });
+        } else {
+          wx.showToast({
+            title: result.error,
+            icon: 'error'
+          });
+        }
       }
     } else if (action === 'decrease') {
       // 减少属性
@@ -479,11 +611,24 @@ Page({
    */
   updatePowerLevel() {
     try {
-      const powerLevel = characterService.calculatePowerLevel(this.data.character);
+      const characterService = this.getCharacterService();
+      if (!characterService || !characterService.calculatePowerLevel) {
+        // 简化的战斗力计算
+        const character = this.data.character;
+        if (character && character.attributes) {
+          const attrs = character.attributes;
+          const powerLevel = (attrs.strength || 0) + (attrs.intelligence || 0) + 
+                           (attrs.charisma || 0) + (attrs.creativity || 0) + 
+                           (attrs.discipline || 0) + (attrs.vitality || 0);
+          this.setData({ powerLevel });
+        }
+        return;
+      }
 
-      this.setData({
-        powerLevel: powerLevel
-      });
+      const powerLevel = this.safeCallCharacterService('calculatePowerLevel', this.data.character);
+      if (powerLevel !== null) {
+        this.setData({ powerLevel });
+      }
     } catch (error) {
       console.error('更新战斗力失败:', error);
     }

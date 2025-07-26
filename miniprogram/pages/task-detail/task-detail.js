@@ -1,5 +1,4 @@
 // 任务详情页面
-import { checkLoginAndRedirect } from '../../utils/auth-helper.js';
 
 Page({
   data: {
@@ -16,15 +15,61 @@ Page({
     verificationTypes: {},
     taskStatuses: {}
   },
+  
+  // Toast状态跟踪
+  toastShowing: false,
 
   onLoad: function(options) {
+    console.log('📄 task-detail 页面 onLoad, options:', options);
+    
+    // 重写setData方法添加日志
+    const originalSetData = this.setData;
+    this.setData = function(data, callback) {
+      console.log('📊 setData 被调用, data:', data);
+      return originalSetData.call(this, data, callback);
+    };
+    
+    // 创建包装的showToast方法
+    this.showToastWithLog = function(options) {
+      console.log('🎉 showToast 被调用, options:', options);
+      console.log('🎉 当前Toast状态:', this.toastShowing);
+      
+      this.toastShowing = true;
+      
+      const originalSuccess = options.success;
+      const originalFail = options.fail;
+      const originalComplete = options.complete;
+      
+      return wx.showToast({
+        ...options,
+        success: (res) => {
+          console.log('🎉 Toast显示成功:', res);
+          if (originalSuccess) originalSuccess(res);
+        },
+        fail: (err) => {
+          console.error('❌ Toast显示失败:', err);
+          this.toastShowing = false;
+          if (originalFail) originalFail(err);
+        },
+        complete: (res) => {
+          console.log('🎉 Toast显示完成:', res);
+          // Toast会在duration后自动消失
+          setTimeout(() => {
+            this.toastShowing = false;
+            console.log('🎉 Toast状态重置为false');
+          }, options.duration || 1500);
+          if (originalComplete) originalComplete(res);
+        }
+      });
+    };
+    
     const taskId = options.id;
     if (taskId) {
       this.setData({ taskId });
       this.loadTaskDetail();
       this.loadTaskOptions();
     } else {
-      wx.showToast({
+      this.showToastWithLog({
         title: '任务不存在',
         icon: 'error'
       });
@@ -36,7 +81,11 @@ Page({
 
   onShow: function() {
     // 检查登录状态
-    if (!checkLoginAndRedirect(`/pages/task-detail/task-detail?id=${this.data.taskId}`)) {
+    const app = getApp();
+    if (!app.globalData.isLoggedIn) {
+      wx.redirectTo({
+        url: '/pages/login/login'
+      });
       return;
     }
     
@@ -50,7 +99,10 @@ Page({
    * 加载任务详情
    */
   loadTaskDetail() {
+    console.log('🔄 loadTaskDetail 开始执行');
+    
     try {
+      console.log('🔄 设置loading状态为true');
       this.setData({ loading: true });
 
       const taskService = this.getTaskService();
@@ -58,8 +110,12 @@ Page({
         throw new Error('任务服务不可用');
       }
 
+      console.log('🔄 获取任务详情, taskId:', this.data.taskId);
       const task = taskService.getTaskById(this.data.taskId);
+      console.log('🔄 获取到的任务:', task);
+      
       if (!task) {
+        console.error('❌ 任务不存在');
         wx.showToast({
           title: '任务不存在',
           icon: 'error'
@@ -70,18 +126,22 @@ Page({
         return;
       }
 
+      console.log('🔄 更新页面数据');
       this.setData({
         task,
         progress: task.progress || 0
       });
+      console.log('🔄 页面数据更新完成');
     } catch (error) {
-      console.error('加载任务详情失败:', error);
+      console.error('💥 加载任务详情失败:', error);
       wx.showToast({
         title: '加载失败',
         icon: 'error'
       });
     } finally {
+      console.log('🔄 设置loading状态为false');
       this.setData({ loading: false });
+      console.log('🔄 loadTaskDetail 执行完成');
     }
   },
 
@@ -126,7 +186,7 @@ Page({
    */
   async startTask() {
     try {
-      const taskService = await this.getTaskService();
+      const taskService = this.getTaskService();
       if (!taskService) {
         throw new Error('任务服务不可用');
       }
@@ -139,7 +199,10 @@ Page({
           icon: 'success'
         });
         
-        this.loadTaskDetail();
+        // 延迟重新加载任务详情，确保Toast正常显示
+        setTimeout(() => {
+          this.loadTaskDetail();
+        }, 100);
       } else {
         wx.showToast({
           title: result.error,
@@ -307,7 +370,7 @@ Page({
    */
   async finishTask(verificationData = null) {
     try {
-      const taskService = await this.getTaskService();
+      const taskService = this.getTaskService();
       if (!taskService) {
         throw new Error('任务服务不可用');
       }
@@ -324,7 +387,10 @@ Page({
           icon: 'success'
         });
         
-        this.loadTaskDetail();
+        // 延迟重新加载任务详情，确保Toast正常显示
+        setTimeout(() => {
+          this.loadTaskDetail();
+        }, 100);
       } else {
         wx.showToast({
           title: result.error,
@@ -345,15 +411,23 @@ Page({
    */
   async giveRewards(task) {
     try {
-      if (!task.rewards) return;
+      console.log('🎁 开始发放奖励, task.rewards:', task.rewards);
+      if (!task.rewards) {
+        console.log('⚠️ 任务没有奖励，跳过');
+        return;
+      }
 
       // 获取角色服务
-      const characterServiceModule = require('../../services/character-service.js');
-      const characterService = characterServiceModule.default;
+      console.log('🎁 获取角色服务');
+      const characterService = require('../../services/character-service.js');
+      console.log('🎁 角色服务:', characterService);
+      console.log('🎁 addExperience方法:', typeof characterService.addExperience);
 
       // 发放经验值
       if (task.rewards.experience > 0) {
-        const expResult = characterService.addExperience(task.rewards.experience);
+        console.log('🎁 发放经验值:', task.rewards.experience);
+        const expResult = await characterService.addExperience(task.rewards.experience);
+        console.log('🎁 经验值发放结果:', expResult);
         
         if (expResult.leveledUp) {
           // 如果升级了，显示升级动画
@@ -380,6 +454,14 @@ Page({
         }
       }
 
+      // 验证数据持久化
+      console.log('🎁 验证数据持久化');
+      const savedCharacter = wx.getStorageSync('characterInfo');
+      console.log('🎁 本地存储的角色数据:', savedCharacter);
+      
+      const app = getApp();
+      console.log('🎁 全局状态的角色数据:', app.globalData.character);
+
       // 显示奖励信息
       const rewardText = `获得奖励：\n经验值 +${task.rewards.experience}\n金币 +${task.rewards.coins}`;
       
@@ -400,7 +482,18 @@ Page({
    * 取消任务
    */
   async cancelTask() {
+    console.log('🔥 cancelTask 方法被调用');
+    
+    // 防重复调用检查
+    if (this.cancelingTask) {
+      console.log('⚠️ 任务取消中，忽略重复调用');
+      return;
+    }
+    
+    this.cancelingTask = true;
+    
     try {
+      console.log('📱 显示确认对话框');
       const result = await wx.showModal({
         title: '取消任务',
         content: '确定要取消这个任务吗？',
@@ -408,35 +501,64 @@ Page({
         confirmColor: '#ef4444'
       });
 
-      if (!result.confirm) return;
+      console.log('📱 对话框结果:', result);
+      if (!result.confirm) {
+        console.log('❌ 用户取消操作');
+        return;
+      }
 
-      const taskService = await this.getTaskService();
+      console.log('✅ 用户确认取消，开始处理');
+      const taskService = this.getTaskService();
       if (!taskService) {
         throw new Error('任务服务不可用');
       }
 
+      console.log('🔧 调用任务服务更新状态');
       const updateResult = taskService.updateTaskStatus(this.data.taskId, 'cancelled');
+      console.log('🔧 任务服务返回结果:', updateResult);
       
       if (updateResult.success) {
-        wx.showToast({
-          title: '任务已取消',
-          icon: 'success'
-        });
+        console.log('✅ 任务取消成功，开始更新UI');
         
+        // 确保清除之前的Toast
+        console.log('🧹 清除之前的Toast');
+        wx.hideToast();
+        
+        // 先更新页面状态
+        console.log('🔄 开始重新加载任务详情');
         this.loadTaskDetail();
+        console.log('🔄 任务详情重新加载完成');
+        
+        // 延迟显示Toast，确保页面更新完成
+        console.log('⏰ 设置延迟显示Toast');
+        setTimeout(() => {
+          console.log('🎉 显示成功Toast');
+          this.showToastWithLog({
+            title: '任务已取消',
+            icon: 'success',
+            duration: 2000
+          });
+        }, 50);
       } else {
+        console.error('❌ 任务取消失败:', updateResult.error);
         wx.showToast({
           title: updateResult.error,
           icon: 'error'
         });
       }
     } catch (error) {
-      console.error('取消任务失败:', error);
+      console.error('💥 取消任务异常:', error);
       wx.showToast({
         title: '操作失败',
         icon: 'error'
       });
+    } finally {
+      // 重置防重复调用标记
+      this.cancelingTask = false;
+      console.log('🔓 重置取消任务锁');
     }
+    
+    console.log('🏁 cancelTask 方法执行完成');
   },
 
   /**
@@ -453,7 +575,7 @@ Page({
 
       if (!result.confirm) return;
 
-      const taskService = await this.getTaskService();
+      const taskService = this.getTaskService();
       if (!taskService) {
         throw new Error('任务服务不可用');
       }
@@ -497,7 +619,7 @@ Page({
    */
   async saveProgress() {
     try {
-      const taskService = await this.getTaskService();
+      const taskService = this.getTaskService();
       if (!taskService) {
         throw new Error('任务服务不可用');
       }
@@ -514,7 +636,10 @@ Page({
           icon: 'success'
         });
 
-        this.loadTaskDetail();
+        // 延迟重新加载任务详情，确保Toast正常显示
+        setTimeout(() => {
+          this.loadTaskDetail();
+        }, 100);
       } else {
         wx.showToast({
           title: result.error,
@@ -716,8 +841,10 @@ Page({
           duration: 2000
         });
 
-        // 重新加载任务详情
-        this.loadTaskDetail();
+        // 延迟重新加载任务详情，确保Toast正常显示
+        setTimeout(() => {
+          this.loadTaskDetail();
+        }, 100);
       } else {
         wx.showToast({
           title: result.error || '保存失败',
@@ -750,7 +877,7 @@ Page({
 
       if (!result.confirm) return;
 
-      const taskService = await this.getTaskService();
+      const taskService = this.getTaskService();
       if (!taskService) {
         throw new Error('任务服务不可用');
       }
@@ -763,7 +890,10 @@ Page({
           icon: 'success'
         });
 
-        this.loadTaskDetail();
+        // 延迟重新加载任务详情，确保Toast正常显示
+        setTimeout(() => {
+          this.loadTaskDetail();
+        }, 100);
       } else {
         wx.showToast({
           title: deleteResult.error,

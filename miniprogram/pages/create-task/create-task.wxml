@@ -172,7 +172,7 @@
       type="primary"
       text="{{loading ? '创建中...' : '创建任务'}}"
       bindtap="createTask"
-      disabled="{{loading}}"
+      disabled="{{loading || creating}}"
     />
   </view>
 

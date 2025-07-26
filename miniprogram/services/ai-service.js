@@ -4,6 +4,15 @@ class AIService {
     this.apiKey = ''; // 需要配置真实的API密钥
     this.baseURL = 'https://api.openai.com/v1';
     this.model = 'gpt-3.5-turbo';
+
+    // 引用DeepSeek AI服务
+    try {
+      const DeepSeekAIService = require('./deepseek-ai-service.js');
+      this.deepSeekService = new DeepSeekAIService();
+    } catch (error) {
+      console.error('无法加载DeepSeek AI服务:', error);
+      this.deepSeekService = null;
+    }
   }
 
   /**
@@ -12,7 +21,7 @@ class AIService {
   async generateTaskRecommendations(userProfile, emotionalState, characterGrowth, userStats) {
     try {
       const prompt = this.buildTaskRecommendationPrompt(userProfile, emotionalState, characterGrowth, userStats);
-      
+
       const response = await this.callOpenAI(prompt, {
         max_tokens: 1000,
         temperature: 0.7,
@@ -254,10 +263,11 @@ class AIService {
     try {
       const prompt = this.buildRandomEventPrompt(userProfile, userStats, emotionalState);
 
-      const response = await this.callChatAnywhereAPI(prompt);
+      const response = await this.callDeepSeek([{ role: 'user', content: prompt }]);
 
-      if (response && response.choices && response.choices[0]) {
-        const content = response.choices[0].message.content;
+      if (response) {
+        // deepseek-ai-service.js 返回的是字符串内容
+        const content = typeof response === 'string' ? response : response.choices[0].message.content;
         const eventData = this.parseRandomEventResponse(content);
 
         if (eventData) {
@@ -420,6 +430,23 @@ class AIService {
 
     const randomIndex = Math.floor(Math.random() * fallbackEvents.length);
     return fallbackEvents[randomIndex];
+  }
+
+  /**
+   * 调用DeepSeek AI服务
+   */
+  async callDeepSeek(messages, options = {}) {
+    if (!this.deepSeekService) {
+      throw new Error('DeepSeek AI服务不可用');
+    }
+    
+    try {
+      const response = await this.deepSeekService.callDeepSeek(messages, options);
+      return response;
+    } catch (error) {
+      console.error('调用DeepSeek AI服务失败:', error);
+      throw error;
+    }
   }
 }
 

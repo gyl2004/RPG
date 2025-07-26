@@ -122,14 +122,14 @@ class DeepSeekAIService {
       }
 
       const prompt = this.buildTaskRecommendationPrompt(userProfile, emotionalState, characterGrowth, userStats);
-      
+
       const response = await this.callDeepSeek([
         {
           role: "system",
           content: "你是一个专业的生活教练和任务规划师，擅长为用户制定个性化的成长任务。请仔细分析用户的情况，提供有针对性的建议。"
         },
         {
-          role: "user", 
+          role: "user",
           content: prompt
         }
       ], {
@@ -303,16 +303,16 @@ class DeepSeekAIService {
   parseTaskRecommendations(response) {
     try {
       console.log('DeepSeek原始响应:', response);
-      
+
       // 尝试提取JSON部分
       let jsonStr = response;
-      
+
       // 如果响应包含代码块，提取其中的JSON
       const codeBlockMatch = response.match(/```json\s*([\s\S]*?)\s*```/);
       if (codeBlockMatch) {
         jsonStr = codeBlockMatch[1];
       }
-      
+
       // 如果响应包含大括号，提取JSON对象
       const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -320,7 +320,7 @@ class DeepSeekAIService {
       }
 
       const data = JSON.parse(jsonStr);
-      
+
       if (!data.recommendations || !Array.isArray(data.recommendations)) {
         throw new Error('响应格式不正确，缺少recommendations数组');
       }
@@ -373,7 +373,7 @@ class DeepSeekAIService {
    */
   fallbackToLocalRecommendations(userProfile, emotionalState, characterGrowth, userStats) {
     console.log('使用本地备选推荐算法');
-    
+
     const localTasks = [
       {
         id: 'local_1',
@@ -391,7 +391,7 @@ class DeepSeekAIService {
         estimatedReward: { coins: 25, experience: 40 }
       },
       {
-        id: 'local_2', 
+        id: 'local_2',
         title: '整理工作空间',
         description: '花15分钟整理你的桌面或工作区域，让环境更加整洁有序',
         category: 'productivity',
@@ -478,7 +478,7 @@ class DeepSeekAIService {
         role: "user",
         content: prompt
       }], {
-        max_tokens: 1000,
+        max_tokens: 1500,
         temperature: 0.8
       });
 
@@ -510,62 +510,75 @@ class DeepSeekAIService {
     const todayHabits = userActions.completedHabits || [];
     const recentItems = collectedItems.slice(0, 3); // 最近3个物品
 
-    return `你是一个专业的RPG故事创作者。请基于用户的真实行为创作一个个性化的RPG冒险故事章节。
+    return `你是一位资深的奇幻小说作家和RPG游戏设计师，擅长创作引人入胜的冒险故事。请基于用户的真实生活行为，创作一个充满想象力和沉浸感的RPG冒险故事章节。
 
-角色信息：
-- 角色名称：${characterData.name}
-- 角色职业：${characterData.class}
-- 角色等级：${characterData.level}
-- 当前经验：${characterData.experience}
+🎭 角色档案：
+- 冒险者姓名：${characterData.name}
+- 职业身份：${characterData.class || '神秘冒险者'}
+- 冒险等级：第${characterData.level}级
+- 积累经验：${characterData.experience}点冒险经验
+- 角色特质：根据完成的任务和习惯展现出的性格特点
 
-今日完成的现实任务：
-${todayTasks.map(task => `- ${task.title}: ${task.description}`).join('\n') || '- 今日暂无完成的任务'}
+📋 今日现实成就转化为冒险行为：
+${todayTasks.length > 0 ? todayTasks.map(task => `🎯 【${task.title}】- 在奇幻世界中可能对应：完成了一项重要的冒险任务或挑战`).join('\n') : '🎯 今日虽无具体任务完成，但冒险者在默默积蓄力量...'}
 
-今日完成的习惯：
-${todayHabits.map(habit => `- ${habit.name}`).join('\n') || '- 今日暂无完成的习惯'}
+🔄 今日习惯养成转化为能力提升：
+${todayHabits.length > 0 ? todayHabits.map(habit => `💪 【${habit.name}】- 通过持续的修炼，${characterData.name}的某项核心能力得到了强化`).join('\n') : '💪 今日虽无习惯完成，但内在的潜力正在悄然觉醒...'}
 
-最近收藏的物品：
-${recentItems.map(item => `- ${item.name}（${item.category}）: ${item.description || '神秘物品'}`).join('\n') || '- 暂无收藏物品'}
+🎒 神秘收藏品的力量：
+${recentItems.length > 0 ? recentItems.map(item => `✨ 【${item.name}】(${item.category || '未知类别'}) - ${item.description || '这件物品散发着神秘的魔法光芒，似乎蕴含着特殊的力量'}`).join('\n') : '✨ 虽然暂无特殊收藏，但${characterData.name}敏锐的直觉告诉他，重要的发现即将到来...'}
 
-${previousStory ? `上一章节故事：\n${previousStory.content}\n\n基于上一章节继续发展故事。` : '这是一个全新的冒险开始。'}
+${previousStory ? `📖 前情回顾：
+在上一次的冒险中：${previousStory.content}
 
-创作要求：
-1. 将用户的现实任务转化为RPG世界中的冒险行为
-2. 让收藏的物品在故事中发挥重要作用
-3. 根据完成的习惯体现角色的成长和能力提升
-4. 故事要有明确的情节发展和转折点
-5. 在故事结尾提供2-3个选择分支，让用户决定下一步行动
-6. 故事长度控制在400-600字
-7. 语言要生动有趣，充满冒险感和成就感
+现在，故事将在此基础上继续发展，展现${characterData.name}面临的新挑战和机遇...` : `📖 全新冒险的开端：
+这是${characterData.name}冒险传奇的新篇章，一个充满无限可能的开始...`}
 
-请返回JSON格式：
+🎨 创作指导原则：
+1. 【现实映射】：巧妙地将用户的现实任务转化为奇幻世界中的具体冒险情节，让每个完成的任务都成为故事中的英雄行为
+2. 【物品赋能】：让用户收藏的物品在故事中扮演关键角色，赋予它们神奇的属性和重要的剧情作用
+3. 【成长体现】：通过完成的习惯展现角色的能力提升、性格塑造和内在成长
+4. 【情节张力】：构建有起伏的故事节奏，包含挑战、转折、高潮和收获
+5. 【选择分支】：在故事结尾提供3个各具特色的选择，每个选择都应该有明确的风险和收益
+6. 【丰富描写】：使用生动的环境描写、细腻的心理刻画和精彩的动作场面
+7. 【字数要求】：故事内容应达到500-600字，确保情节饱满、描写细致
+8. 【情感共鸣】：让读者能感受到成就感、冒险的刺激和角色成长的喜悦
+
+🎯 故事风格要求：
+- 语言风格：生动活泼，富有画面感，适合中文读者的表达习惯
+- 情节节奏：开头引人入胜，中间波澜起伏，结尾留有悬念
+- 角色塑造：突出${characterData.name}的个人特色和成长轨迹
+- 世界观：构建一个既熟悉又新奇的奇幻世界，融合现代元素和古典魔法
+
+请严格按照以下JSON格式返回，确保所有字段都完整填写：
+
 {
-  "title": "章节标题",
-  "content": "故事内容",
-  "mood": "故事氛围（如：exciting, mysterious, triumphant, challenging）",
+  "title": "富有诗意和吸引力的章节标题（10-20字）",
+  "content": "详细生动的故事内容（500-600字，包含环境描写、对话、心理活动、动作场面等丰富元素）",
+  "mood": "故事整体氛围（从以下选择：exciting兴奋刺激, mysterious神秘莫测, triumphant胜利凯旋, challenging充满挑战, inspiring鼓舞人心, adventurous冒险刺激, peaceful宁静祥和, empowering力量觉醒）",
   "choices": [
     {
       "id": "choice1",
-      "text": "选择1的描述",
-      "consequence": "选择1可能的后果提示"
+      "text": "第一个选择的具体描述（20-30字，要有吸引力）",
+      "consequence": "选择后可能的结果和风险提示（30-50字）"
     },
     {
-      "id": "choice2",
-      "text": "选择2的描述",
-      "consequence": "选择2可能的后果提示"
+      "id": "choice2", 
+      "text": "第二个选择的具体描述（20-30字，与第一个形成对比）",
+      "consequence": "选择后可能的结果和风险提示（30-50字）"
     },
     {
       "id": "choice3",
-      "text": "选择3的描述",
-      "consequence": "选择3可能的后果提示"
+      "text": "第三个选择的具体描述（20-30字，提供另一种可能）", 
+      "consequence": "选择后可能的结果和风险提示（30-50字）"
     }
   ],
   "rewards": {
-    "experience": "获得的经验值",
-    "items": ["可能获得的物品"],
-    "skills": ["提升的技能"]
+    "experience": 根据完成任务和习惯数量计算的经验值（数字），
+    "items": ["根据故事情节可能获得的1-3件物品"],
+    "skills": ["通过这次冒险提升的2-4项技能或能力"]
   },
-  "nextHints": "下一章节的发展提示"
+  "nextHints": "对下一章节发展的神秘预告（50-80字，要有悬念和期待感）"
 }`;
   }
 
@@ -771,54 +784,77 @@ ${previousStory ? `上一章节故事：\n${previousStory.content}\n\n基于上�
         };
       }
 
-      const prompt = `基于用户的选择继续RPG故事：
+      const prompt = `你是一位经验丰富的RPG故事编剧，现在需要基于玩家的选择继续编写精彩的冒险故事分支。
 
-上一章节：${previousStory.title}
-故事内容：${previousStory.content}
+📖 故事背景回顾：
+【上一章节】：${previousStory.title}
+【故事内容】：${previousStory.content}
 
-用户选择：${userChoice.text}
-选择后果：${userChoice.consequence}
+🎯 玩家的关键决定：
+【选择内容】：${userChoice.text}
+【预期后果】：${userChoice.consequence}
 
-角色信息：
-- 角色名称：${characterData.name}
-- 角色等级：${characterData.level}
-- 当前状态：基于选择的发展
+👤 冒险者档案：
+- 英雄姓名：${characterData.name}
+- 当前等级：第${characterData.level}级
+- 角色职业：${characterData.class || '神秘冒险者'}
+- 当前章节：第${previousStory.chapter || 1}章
+- 总章节数：${previousStory.totalChapters || 4}章
+- 成长状态：通过这次选择展现出的新特质
 
-请继续故事发展，要求：
-1. 基于用户选择的后果展开情节
-2. 保持故事的连贯性和逻辑性
-3. 引入新的挑战或机遇
-4. 提供新的选择分支
-5. 故事长度300-500字
+🎨 故事续写要求：
+1. 【选择后果】：详细展现用户选择带来的直接影响和连锁反应
+2. 【情节连贯】：与前一章节无缝衔接，保持世界观和角色设定的一致性
+3. 【冲突升级】：引入新的挑战、谜团或机遇，推动故事向前发展
+4. 【角色成长】：通过这次经历展现${characterData.name}的能力提升或性格变化
+5. 【环境描写】：丰富的场景描述，让读者身临其境
+6. 【对话互动】：适当加入角色对话或内心独白，增强代入感
+7. 【悬念设置】：在结尾留下钩子，为下一次选择做铺垫
+8. 【字数控制】：故事内容500字左右，确保情节饱满而不冗长
 
-请严格按照以下JSON格式返回，不要添加任何其他文字：
+🌟 创作风格指导：
+- 语言风格：生动形象，富有节奏感，符合中文表达习惯
+- 情感色彩：根据选择的性质调整故事氛围（紧张、温馨、神秘等）
+- 细节刻画：注重动作描写、环境渲染和心理活动的细腻表现
+- 想象力：在合理范围内发挥创意，让故事充满奇幻色彩
+- 章节意识：${previousStory.chapter >= 3 ? '这是接近尾声的章节，要为故事的结束做铺垫' : '这是故事发展的重要阶段，要推动情节向前发展'}
+
+请严格按照以下JSON格式返回完整的故事数据，不要添加任何格式说明或其他文字：
+
 {
-  "title": "故事标题",
-  "content": "详细的故事内容（300-500字）",
-  "mood": "mysterious/exciting/peaceful等",
+  "title": "富有吸引力的新章节标题（12-25字，体现这次选择的核心主题）",
+  "content": "详细生动的故事续写内容（500字左右，包含丰富的描写和情节发展）",
+  "mood": "故事氛围（选择：exciting兴奋刺激, mysterious神秘莫测, triumphant胜利凯旋, challenging充满挑战, inspiring鼓舞人心, adventurous冒险刺激, peaceful宁静祥和, empowering力量觉醒, dramatic戏剧性转折）",
   "choices": [
     {
       "id": "choice1",
-      "text": "选择1的描述",
-      "consequence": "选择1的后果"
+      "text": "第一个新选择的描述（25-35字，要有吸引力和挑战性）",
+      "consequence": "这个选择可能带来的结果预告（40-60字，要有悬念）"
     },
     {
       "id": "choice2",
-      "text": "选择2的描述",
-      "consequence": "选择2的后果"
+      "text": "第二个新选择的描述（25-35字，与第一个形成鲜明对比）",
+      "consequence": "这个选择可能带来的结果预告（40-60字，要有悬念）"
+    },
+    {
+      "id": "choice3",
+      "text": "第三个新选择的描述（25-35字，提供独特的解决方案）",
+      "consequence": "这个选择可能带来的结果预告（40-60字，要有悬念）"
     }
   ],
   "rewards": {
-    "experience": 数值,
-    "skills": ["技能1", "技能2"]
-  }
+    "experience": 根据故事发展给予的经验值（50-150之间的数字），
+    "items": ["根据剧情可能获得的1-2件新物品或道具"],
+    "skills": ["通过这次经历提升的2-3项具体技能或能力"]
+  },
+  "nextHints": "对下一章节发展的神秘预告（60-100字，要充满悬念和期待感）"
 }`;
 
       const response = await this.callDeepSeek([{
         role: "user",
         content: prompt
       }], {
-        max_tokens: 800,
+        max_tokens: 1200,
         temperature: 0.8
       });
 

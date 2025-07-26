@@ -1,5 +1,7 @@
 // 创建任务页面
-import { checkLoginAndRedirect, getCurrentCharacter } from '../../utils/auth-helper.js';
+
+// 全局创建锁，防止重复创建
+let isCreatingTask = false;
 
 Page({
   data: {
@@ -23,6 +25,7 @@ Page({
     
     // UI状态
     loading: false,
+    creating: false, // 添加创建状态标记
     showCategoryPicker: false,
     showDifficultyPicker: false,
     showVerificationPicker: false,
@@ -45,9 +48,18 @@ Page({
 
   onShow: function() {
     // 检查登录状态
-    if (!checkLoginAndRedirect('/pages/create-task/create-task')) {
+    const app = getApp();
+    if (!app.globalData.isLoggedIn) {
+      wx.redirectTo({
+        url: '/pages/login/login'
+      });
       return;
     }
+  },
+
+  onUnload: function() {
+    // 页面卸载时重置全局锁
+    isCreatingTask = false;
   },
 
   /**
@@ -275,7 +287,32 @@ Page({
    * 创建任务
    */
   createTask() {
+    // 全局创建锁检查
+    if (isCreatingTask) {
+      console.log('全局创建锁生效，忽略重复调用');
+      return;
+    }
+
+    // 双重防重复提交检查
+    if (this.data.loading || this.data.creating) {
+      console.log('任务创建中，忽略重复点击');
+      return;
+    }
+
+    // 立即设置全局锁和本地状态
+    isCreatingTask = true;
+    this.data.creating = true;
+    this.data.loading = true;
+
     if (!this.validateForm()) {
+      // 重置状态
+      isCreatingTask = false;
+      this.data.creating = false;
+      this.data.loading = false;
+      this.setData({ 
+        loading: false,
+        creating: false 
+      });
       wx.showToast({
         title: '请检查表单信息',
         icon: 'error'
@@ -284,7 +321,11 @@ Page({
     }
 
     try {
-      this.setData({ loading: true });
+      console.log('开始创建任务:', this.data.formData);
+      this.setData({ 
+        loading: true,
+        creating: true 
+      });
 
       const taskService = this.getTaskService();
       if (!taskService) {
@@ -292,6 +333,7 @@ Page({
       }
 
       const result = taskService.createTask(this.data.formData);
+      console.log('任务创建结果:', result);
 
       if (result.success) {
         wx.showToast({
@@ -316,7 +358,14 @@ Page({
         icon: 'error'
       });
     } finally {
-      this.setData({ loading: false });
+      // 重置所有状态
+      isCreatingTask = false;
+      this.data.creating = false;
+      this.data.loading = false;
+      this.setData({ 
+        loading: false,
+        creating: false 
+      });
     }
   },
 

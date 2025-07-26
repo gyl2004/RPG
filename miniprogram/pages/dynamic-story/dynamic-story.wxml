@@ -13,7 +13,8 @@
       <text class="character-level">Lv.{{character.level}}</text>
     </view>
     <view class="story-stats">
-      <text class="stat-item">📖 故事章节: {{storyHistory.length}}</text>
+      <text class="stat-item">📖 故事历史: {{storyHistory.length}}</text>
+      <text class="stat-item" wx:if="{{currentStory}}">📑 当前进度: {{currentChapter}}/{{maxChapters}}章</text>
       <text class="stat-item">⭐ 今日任务: {{todayActions.completedTasks.length}}</text>
     </view>
   </view>

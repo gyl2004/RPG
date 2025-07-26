@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "创建任务",
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

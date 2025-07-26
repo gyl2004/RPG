@@ -1,0 +1,508 @@
+/* 奖励中心页面样式 */
+
+.rewards-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20rpx;
+}
+
+/* 页面头部 */
+.rewards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0 30rpx;
+}
+
+.page-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.currency-display {
+  display: flex;
+  gap: 15rpx;
+}
+
+.currency-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.currency-icon {
+  font-size: 24rpx;
+}
+
+.currency-amount {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+/* 标签页导航 */
+.tab-navigation {
+  margin-bottom: 30rpx;
+}
+
+.tab-scroll {
+  white-space: nowrap;
+}
+
+.tab-list {
+  display: flex;
+  gap: 15rpx;
+  padding: 0 5rpx;
+}
+
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 15rpx 20rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 120rpx;
+}
+
+.tab-item.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+}
+
+.tab-icon {
+  font-size: 32rpx;
+}
+
+.tab-text {
+  font-size: 22rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* 区块标题 */
+.section-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 20rpx;
+}
+
+/* 等级进度 */
+.level-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.level-card {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.level-info {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.level-current {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+.level-next {
+  font-size: 28rpx;
+  color: #a0a0a0;
+}
+
+.exp-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.exp-bar {
+  height: 12rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.exp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 6rpx;
+  transition: width 0.3s ease;
+}
+
+.exp-text {
+  font-size: 22rpx;
+  color: #a0a0a0;
+  text-align: center;
+}
+
+.exp-to-next {
+  font-size: 20rpx;
+  color: #6b7280;
+  text-align: center;
+}
+
+/* 统计信息 */
+.stats-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+  padding: 25rpx;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.stat-icon {
+  font-size: 36rpx;
+}
+
+.stat-number {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+.stat-label {
+  font-size: 20rpx;
+  color: #a0a0a0;
+}
+
+/* 背包样式 */
+.inventory-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.item-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-icon {
+  font-size: 40rpx;
+}
+
+.item-rarity {
+  padding: 4rpx 8rpx;
+  border-radius: 10rpx;
+  font-size: 16rpx;
+}
+
+.item-rarity.common {
+  background: rgba(156, 163, 175, 0.2);
+}
+
+.item-rarity.uncommon {
+  background: rgba(34, 197, 94, 0.2);
+}
+
+.item-rarity.rare {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.item-rarity.epic {
+  background: rgba(139, 92, 246, 0.2);
+}
+
+.item-rarity.legendary {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+.item-name {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.item-description {
+  font-size: 20rpx;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+.item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10rpx;
+}
+
+.item-count {
+  font-size: 20rpx;
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.empty-inventory {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 20rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #ffffff;
+  margin-bottom: 10rpx;
+}
+
+.empty-hint {
+  font-size: 22rpx;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+/* 成就样式 */
+.achievements-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.achievement-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+  padding: 25rpx;
+  border: 2rpx solid transparent;
+}
+
+.achievement-card.unlocked {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.achievement-card.locked {
+  opacity: 0.7;
+}
+
+.achievement-header {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  margin-bottom: 15rpx;
+}
+
+.achievement-icon {
+  font-size: 40rpx;
+  min-width: 60rpx;
+  text-align: center;
+}
+
+.achievement-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5rpx;
+}
+
+.achievement-name {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.achievement-description {
+  font-size: 22rpx;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+.achievement-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rpx;
+}
+
+.status-icon {
+  font-size: 24rpx;
+}
+
+.status-text {
+  font-size: 20rpx;
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.achievement-progress {
+  margin-bottom: 10rpx;
+}
+
+.progress-bar {
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+.achievement-rewards {
+  padding: 10rpx;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 8rpx;
+}
+
+.rewards-text {
+  font-size: 20rpx;
+  color: #22c55e;
+  text-align: center;
+}
+
+/* 商店样式 */
+.shop-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.shop-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.item-price {
+  display: flex;
+  align-items: center;
+  gap: 5rpx;
+}
+
+.price-icon {
+  font-size: 18rpx;
+}
+
+.price-amount {
+  font-size: 20rpx;
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid rgba(255, 255, 255, 0.3);
+  border-top: 6rpx solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #a0a0a0;
+  font-size: 28rpx;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .stats-grid,
+  .inventory-grid,
+  .shop-grid {
+    grid-template-columns: 1fr;
+    gap: 15rpx;
+  }
+  
+  .currency-display {
+    flex-direction: column;
+    gap: 10rpx;
+  }
+}

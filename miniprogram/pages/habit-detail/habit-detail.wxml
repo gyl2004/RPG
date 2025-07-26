@@ -1,0 +1,152 @@
+<!--习惯详情页面-->
+<view class="habit-detail-container" wx:if="{{habit}}">
+  <!-- 习惯基本信息 -->
+  <view class="habit-info-section">
+    <view class="habit-header">
+      <text class="habit-name">{{habit.name}}</text>
+      <view class="habit-status {{habit.status}}" wx:if="{{statuses && statuses[habit.status]}}">
+        <text class="status-icon">{{statuses[habit.status].icon}}</text>
+        <text class="status-text">{{statuses[habit.status].name}}</text>
+      </view>
+    </view>
+    
+    <text class="habit-description" wx:if="{{habit.description}}">{{habit.description}}</text>
+    
+    <view class="habit-meta">
+      <view class="meta-item" wx:if="{{categories && categories[habit.category]}}">
+        <text class="meta-icon">{{categories[habit.category].icon}}</text>
+        <text class="meta-text">{{categories[habit.category].name}}</text>
+      </view>
+      <view class="meta-item">
+        <text class="meta-icon">📅</text>
+        <text class="meta-text">创建于 {{formatDate(habit.createdAt)}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 统计信息 -->
+  <view class="stats-section">
+    <text class="section-title">统计信息</text>
+    <view class="stats-grid">
+      <view class="stat-card">
+        <text class="stat-number">{{habit.currentStreak}}</text>
+        <text class="stat-label">当前连续</text>
+        <text class="stat-unit">天</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-number">{{habit.longestStreak}}</text>
+        <text class="stat-label">最长连续</text>
+        <text class="stat-unit">天</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-number">{{habit.totalCompletions}}</text>
+        <text class="stat-label">总完成</text>
+        <text class="stat-unit">次</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-number">{{habit.weeklyCheckIns || 0}}</text>
+        <text class="stat-label">本周完成</text>
+        <text class="stat-unit">次</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 今日打卡 -->
+  <view class="checkin-section" wx:if="{{habit.status === 'active'}}">
+    <text class="section-title">今日打卡</text>
+    <view class="checkin-card">
+      <view class="checkin-info">
+        <text class="checkin-date">今日</text>
+        <text class="checkin-status {{habit.todayChecked ? 'checked' : 'unchecked'}}">
+          {{habit.todayChecked ? '已完成' : '待完成'}}
+        </text>
+      </view>
+      <rpg-button
+        wx:if="{{!habit.todayChecked}}"
+        type="accent"
+        text="打卡"
+        size="small"
+        bindtap="checkInHabit"
+      />
+      <view wx:else class="checked-badge">
+        <text class="checked-icon">✅</text>
+        <text class="checked-text">已打卡</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近打卡记录 -->
+  <view class="records-section" wx:if="{{habit.checkIns && habit.checkIns.length > 0}}">
+    <text class="section-title">最近记录</text>
+    <view class="records-list">
+      <view 
+        class="record-item"
+        wx:for="{{habit.checkIns.slice(0, 10)}}"
+        wx:key="id"
+        wx:for-item="record"
+      >
+        <view class="record-date">
+          <text class="date-text">{{record.date}}</text>
+          <text class="time-text">{{record.timestamp ? record.timestamp.substring(11, 19) : ''}}</text>
+        </view>
+        <view class="record-info">
+          <text class="record-count">完成 {{record.count}} 次</text>
+          <text class="record-notes" wx:if="{{record.notes}}">{{record.notes}}</text>
+        </view>
+        <text class="record-icon">✅</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <rpg-button 
+      wx:if="{{habit.status === 'active'}}"
+      type="secondary" 
+      text="暂停习惯" 
+      bindtap="toggleHabitStatus"
+    />
+    <rpg-button 
+      wx:if="{{habit.status === 'paused'}}"
+      type="primary" 
+      text="恢复习惯" 
+      bindtap="toggleHabitStatus"
+    />
+    <rpg-button 
+      type="danger" 
+      text="删除习惯" 
+      bindtap="showDeleteConfirm"
+    />
+  </view>
+
+  <!-- 删除确认模态框 -->
+  <view class="modal-overlay" wx:if="{{showDeleteModal}}" bindtap="hideDeleteConfirm">
+    <view class="delete-modal" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">删除习惯</text>
+      </view>
+      <view class="modal-content">
+        <text class="modal-text">确定要删除习惯"{{habit.name}}"吗？</text>
+        <text class="modal-warning">删除后将无法恢复所有打卡记录。</text>
+      </view>
+      <view class="modal-actions">
+        <rpg-button 
+          type="secondary" 
+          text="取消" 
+          bindtap="hideDeleteConfirm"
+        />
+        <rpg-button 
+          type="danger" 
+          text="删除" 
+          bindtap="deleteHabit"
+        />
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 加载状态 -->
+<view class="loading-state" wx:if="{{loading}}">
+  <view class="loading-spinner"></view>
+  <text class="loading-text">加载中...</text>
+</view>

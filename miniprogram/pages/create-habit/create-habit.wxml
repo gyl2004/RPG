@@ -1,0 +1,191 @@
+<!--创建习惯页面-->
+<view class="create-habit-container">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <text class="page-title">创建习惯</text>
+    <text class="page-subtitle">培养一个新的好习惯</text>
+  </view>
+
+  <!-- 表单内容 -->
+  <view class="form-container">
+    <!-- 习惯名称 -->
+    <view class="form-section">
+      <text class="section-label">习惯名称 *</text>
+      <input 
+        class="form-input"
+        placeholder="例如：每天喝8杯水"
+        value="{{formData.name}}"
+        bindinput="onNameInput"
+        maxlength="20"
+      />
+      <text class="form-hint">简洁明确的习惯描述</text>
+    </view>
+
+    <!-- 习惯描述 -->
+    <view class="form-section">
+      <text class="section-label">习惯描述</text>
+      <textarea 
+        class="form-textarea"
+        placeholder="详细描述这个习惯的内容和目标..."
+        value="{{formData.description}}"
+        bindinput="onDescriptionInput"
+        maxlength="100"
+      />
+    </view>
+
+    <!-- 习惯分类 -->
+    <view class="form-section">
+      <text class="section-label">习惯分类 *</text>
+      <view 
+        class="form-selector"
+        bindtap="showCategoryPicker"
+      >
+        <text class="selector-text" wx:if="{{categories && categories[formData.category]}}">
+          {{categories[formData.category].name}}
+        </text>
+        <text class="selector-text placeholder" wx:else>选择分类</text>
+        <text class="selector-icon" wx:if="{{categories && categories[formData.category]}}">
+          {{categories[formData.category].icon}}
+        </text>
+        <text class="selector-icon" wx:else>📋</text>
+      </view>
+      <text class="form-hint" wx:if="{{categories && categories[formData.category]}}">
+        {{categories[formData.category].description}}
+      </text>
+    </view>
+
+    <!-- 习惯频率 -->
+    <view class="form-section">
+      <text class="section-label">执行频率 *</text>
+      <view 
+        class="form-selector"
+        bindtap="showFrequencyPicker"
+      >
+        <text class="selector-text" wx:if="{{frequencies && frequencies[formData.frequency]}}">
+          {{frequencies[formData.frequency].name}}
+        </text>
+        <text class="selector-text placeholder" wx:else>选择频率</text>
+        <text class="selector-icon" wx:if="{{frequencies && frequencies[formData.frequency]}}">
+          {{frequencies[formData.frequency].icon}}
+        </text>
+        <text class="selector-icon" wx:else>📅</text>
+      </view>
+      <text class="form-hint" wx:if="{{frequencies && frequencies[formData.frequency]}}">
+        {{frequencies[formData.frequency].description}}
+      </text>
+    </view>
+
+    <!-- 目标次数 -->
+    <view class="form-section" wx:if="{{formData.frequency === 'weekly' || formData.frequency === 'custom'}}">
+      <text class="section-label">目标次数</text>
+      <view class="number-input-container">
+        <text class="number-label">每周目标：</text>
+        <input 
+          class="number-input"
+          type="number"
+          value="{{formData.targetCount}}"
+          bindinput="onTargetCountChange"
+          min="1"
+          max="7"
+        />
+        <text class="number-unit">次</text>
+      </view>
+    </view>
+
+    <!-- 提醒时间 -->
+    <view class="form-section">
+      <text class="section-label">提醒时间</text>
+      <picker 
+        mode="time"
+        value="{{formData.reminderTime}}"
+        bindchange="onReminderTimeChange"
+      >
+        <view class="form-selector">
+          <text class="selector-text" wx:if="{{formData.reminderTime}}">
+            {{formData.reminderTime}}
+          </text>
+          <text class="selector-text placeholder" wx:else>设置提醒时间</text>
+          <text class="selector-icon">⏰</text>
+        </view>
+      </picker>
+      <text class="form-hint">可选，设置后会在指定时间提醒你</text>
+    </view>
+
+    <!-- 备注 -->
+    <view class="form-section">
+      <text class="section-label">备注</text>
+      <textarea 
+        class="form-textarea"
+        placeholder="记录一些关于这个习惯的想法或计划..."
+        value="{{formData.notes}}"
+        bindinput="onNotesInput"
+        maxlength="200"
+      />
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <rpg-button 
+      type="secondary" 
+      text="重置" 
+      bindtap="resetForm"
+    />
+    <rpg-button
+      type="primary"
+      text="{{loading ? '创建中...' : '创建习惯'}}"
+      disabled="{{loading || creating}}"
+      bindtap="createHabit"
+    />
+  </view>
+
+  <!-- 分类选择器 -->
+  <view class="picker-overlay" wx:if="{{showCategoryPicker}}" bindtap="closePicker">
+    <view class="picker-modal" catchtap="">
+      <view class="picker-header">
+        <text class="picker-title">选择习惯分类</text>
+      </view>
+      
+      <view class="picker-content">
+        <view 
+          class="picker-item"
+          wx:for="{{categoriesArray}}"
+          wx:key="id"
+          data-category="{{item.id}}"
+          bindtap="selectCategory"
+        >
+          <text class="picker-icon">{{item.icon}}</text>
+          <view class="picker-info">
+            <text class="picker-name">{{item.name}}</text>
+            <text class="picker-desc">{{item.description}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 频率选择器 -->
+  <view class="picker-overlay" wx:if="{{showFrequencyPicker}}" bindtap="closePicker">
+    <view class="picker-modal" catchtap="">
+      <view class="picker-header">
+        <text class="picker-title">选择执行频率</text>
+      </view>
+      
+      <view class="picker-content">
+        <view 
+          class="picker-item"
+          wx:for="{{frequenciesArray}}"
+          wx:key="id"
+          data-frequency="{{item.id}}"
+          bindtap="selectFrequency"
+        >
+          <text class="picker-icon">{{item.icon}}</text>
+          <view class="picker-info">
+            <text class="picker-name">{{item.name}}</text>
+            <text class="picker-desc">{{item.description}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,252 @@
+<!--创建任务页面-->
+<view class="create-task-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">创建新任务</text>
+    <text class="page-subtitle">设定目标，开始你的冒险之旅</text>
+  </view>
+
+  <!-- 任务表单 -->
+  <view class="task-form">
+    <!-- 任务标题 -->
+    <view class="form-section">
+      <text class="section-label">任务标题 *</text>
+      <input 
+        class="form-input {{errors.title ? 'error' : ''}}"
+        placeholder="给你的任务起个名字"
+        value="{{formData.title}}"
+        data-field="title"
+        bindinput="onInputChange"
+        maxlength="50"
+      />
+      <text class="error-text" wx:if="{{errors.title}}">{{errors.title}}</text>
+    </view>
+
+    <!-- 任务描述 -->
+    <view class="form-section">
+      <text class="section-label">任务描述</text>
+      <textarea 
+        class="form-textarea"
+        placeholder="详细描述你要完成的任务"
+        value="{{formData.description}}"
+        data-field="description"
+        bindinput="onInputChange"
+        maxlength="200"
+        auto-height
+      />
+    </view>
+
+    <!-- 任务分类 -->
+    <view class="form-section">
+      <text class="section-label">任务分类 *</text>
+      <view 
+        class="form-selector {{errors.category ? 'error' : ''}}"
+        bindtap="showCategoryPicker"
+      >
+        <text class="selector-text {{formData.category ? '' : 'placeholder'}}">
+          {{formData.category ? categories[formData.category].name : '选择任务分类'}}
+        </text>
+        <text class="selector-icon">{{formData.category ? categories[formData.category].icon : '📋'}}</text>
+      </view>
+      <text class="error-text" wx:if="{{errors.category}}">{{errors.category}}</text>
+    </view>
+
+    <!-- 任务难度 -->
+    <view class="form-section">
+      <text class="section-label">任务难度 *</text>
+      <view 
+        class="form-selector {{errors.difficulty ? 'error' : ''}}"
+        bindtap="showDifficultyPicker"
+      >
+        <text class="selector-text {{formData.difficulty ? '' : 'placeholder'}}">
+          {{formData.difficulty ? difficulties[formData.difficulty].name : '选择任务难度'}}
+        </text>
+        <text class="selector-icon">{{formData.difficulty ? difficulties[formData.difficulty].icon : '⭐'}}</text>
+      </view>
+      <text class="error-text" wx:if="{{errors.difficulty}}">{{errors.difficulty}}</text>
+    </view>
+
+    <!-- 预估时间 -->
+    <view class="form-section">
+      <text class="section-label">预估时间</text>
+      <view class="time-section">
+        <text class="time-label">{{formatTime(formData.estimatedTime)}}</text>
+        <slider 
+          class="time-slider"
+          min="5"
+          max="480"
+          step="5"
+          value="{{formData.estimatedTime}}"
+          bindchange="onTimeSliderChange"
+          activeColor="#3b82f6"
+          backgroundColor="rgba(255,255,255,0.2)"
+        />
+        <view class="time-range">
+          <text class="time-min">5分钟</text>
+          <text class="time-max">8小时</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 记录方式 -->
+    <view class="form-section">
+      <text class="section-label">记录方式</text>
+      <view
+        class="form-selector"
+        bindtap="showVerificationPicker"
+      >
+        <text class="selector-text" wx:if="{{verificationTypes && verificationTypes[formData.verification]}}">
+          {{verificationTypes[formData.verification].name}}
+        </text>
+        <text class="selector-text placeholder" wx:else>选择记录方式</text>
+        <text class="selector-icon" wx:if="{{verificationTypes && verificationTypes[formData.verification]}}">
+          {{verificationTypes[formData.verification].icon}}
+        </text>
+        <text class="selector-icon" wx:else>📝</text>
+      </view>
+      <text class="form-hint" wx:if="{{verificationTypes && verificationTypes[formData.verification]}}">
+        {{verificationTypes[formData.verification].description}}
+      </text>
+    </view>
+
+    <!-- 截止日期 -->
+    <view class="form-section">
+      <text class="section-label">截止日期（可选）</text>
+      <picker 
+        mode="date"
+        value="{{formData.deadline}}"
+        start="{{today}}"
+        bindchange="onDateChange"
+      >
+        <view class="form-selector">
+          <text class="selector-text {{formData.deadline ? '' : 'placeholder'}}">
+            {{formData.deadline || '选择截止日期'}}
+          </text>
+          <text class="selector-icon">📅</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 备注 -->
+    <view class="form-section">
+      <text class="section-label">备注</text>
+      <textarea 
+        class="form-textarea"
+        placeholder="添加一些备注信息"
+        value="{{formData.notes}}"
+        data-field="notes"
+        bindinput="onInputChange"
+        maxlength="100"
+        auto-height
+      />
+    </view>
+  </view>
+
+  <!-- 奖励预览 -->
+  <view class="reward-preview" wx:if="{{formData.category && formData.difficulty}}">
+    <text class="preview-title">🎁 完成奖励</text>
+    <view class="reward-items">
+      <view class="reward-item">
+        <text class="reward-icon">⭐</text>
+        <text class="reward-text">{{previewRewards.experience}} 经验值</text>
+      </view>
+      <view class="reward-item">
+        <text class="reward-icon">💰</text>
+        <text class="reward-text">{{previewRewards.coins}} 金币</text>
+      </view>
+      <view class="reward-item" wx:if="{{previewRewards.attributeBonus}}">
+        <text class="reward-icon">📈</text>
+        <text class="reward-text">属性加成</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <rpg-button
+      type="secondary"
+      text="预览"
+      bindtap="previewTask"
+    />
+    <rpg-button
+      type="primary"
+      text="{{loading ? '创建中...' : '创建任务'}}"
+      bindtap="createTask"
+      disabled="{{loading}}"
+    />
+  </view>
+
+  <!-- 分类选择器 -->
+  <view class="picker-overlay" wx:if="{{showCategoryPicker}}" bindtap="closePicker">
+    <view class="picker-modal" catchtap="">
+      <view class="picker-header">
+        <text class="picker-title">选择任务分类</text>
+      </view>
+      <view class="picker-content">
+        <view
+          class="picker-item"
+          wx:for="{{categoriesArray}}"
+          wx:key="id"
+          data-category="{{item.id}}"
+          bindtap="selectCategory"
+        >
+          <text class="picker-icon">{{item.icon}}</text>
+          <view class="picker-info">
+            <text class="picker-name">{{item.name}}</text>
+            <text class="picker-desc">{{item.description}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 难度选择器 -->
+  <view class="picker-overlay" wx:if="{{showDifficultyPicker}}" bindtap="closePicker">
+    <view class="picker-modal" catchtap="">
+      <view class="picker-header">
+        <text class="picker-title">选择任务难度</text>
+      </view>
+      <view class="picker-content">
+        <view
+          class="picker-item"
+          wx:for="{{difficultiesArray}}"
+          wx:key="id"
+          data-difficulty="{{item.id}}"
+          bindtap="selectDifficulty"
+          style="border-left-color: {{item.color}}"
+        >
+          <text class="picker-icon">{{item.icon}}</text>
+          <view class="picker-info">
+            <text class="picker-name">{{item.name}}</text>
+            <text class="picker-desc">{{item.description}}</text>
+            <text class="picker-multiplier">经验倍率: {{item.expMultiplier}}x</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 记录方式选择器 -->
+  <view class="picker-overlay" wx:if="{{showVerificationPicker}}" bindtap="closePicker">
+    <view class="picker-modal" catchtap="">
+      <view class="picker-header">
+        <text class="picker-title">选择记录方式</text>
+      </view>
+      <view class="picker-content">
+        <view
+          class="picker-item"
+          wx:for="{{verificationTypesArray}}"
+          wx:key="id"
+          data-verification="{{item.id}}"
+          bindtap="selectVerification"
+        >
+          <text class="picker-icon">{{item.icon}}</text>
+          <view class="picker-info">
+            <text class="picker-name">{{item.name}}</text>
+            <text class="picker-desc">{{item.description}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

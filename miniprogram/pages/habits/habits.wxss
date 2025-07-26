@@ -1,0 +1,432 @@
+/* 习惯中心页面样式 */
+
+.habits-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20rpx;
+}
+
+/* 页面头部 */
+.habits-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0 30rpx;
+}
+
+.page-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.header-actions {
+  display: flex;
+  gap: 15rpx;
+}
+
+/* 统计概览 */
+.statistics-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.section-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 20rpx;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+}
+
+.stat-number {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+.stat-label {
+  font-size: 20rpx;
+  color: #a0a0a0;
+  text-align: center;
+}
+
+/* 过滤器 */
+.filter-section {
+  margin-bottom: 30rpx;
+}
+
+.filter-scroll {
+  white-space: nowrap;
+}
+
+.filter-list {
+  display: flex;
+  gap: 15rpx;
+  padding: 0 5rpx;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 20rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 25rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.filter-item.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+}
+
+.filter-icon {
+  font-size: 24rpx;
+}
+
+.filter-text {
+  font-size: 24rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* 习惯列表 */
+.habits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.habit-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 25rpx;
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+/* 习惯头部 */
+.habit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+  gap: 15rpx;
+}
+
+.habit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  flex: 1;
+}
+
+/* 习惯操作按钮 */
+.habit-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  align-items: center;
+}
+
+.action-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border: 2rpx solid transparent;
+}
+
+.action-btn:active {
+  transform: scale(0.9);
+}
+
+.pause-btn {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.pause-btn:active {
+  background: rgba(245, 158, 11, 0.3);
+}
+
+.resume-btn {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.resume-btn:active {
+  background: rgba(34, 197, 94, 0.3);
+}
+
+.delete-btn {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.delete-btn:active {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+.action-icon {
+  font-size: 24rpx;
+}
+
+.habit-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.habit-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ffffff;
+  flex: 1;
+}
+
+.habit-status {
+  padding: 6rpx 12rpx;
+  border-radius: 15rpx;
+  font-size: 20rpx;
+}
+
+.habit-status.active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.habit-status.paused {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.habit-status.completed {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.habit-description {
+  font-size: 24rpx;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+.habit-meta {
+  display: flex;
+  gap: 20rpx;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.meta-icon {
+  font-size: 20rpx;
+}
+
+.meta-text {
+  font-size: 20rpx;
+  color: #a0a0a0;
+}
+
+/* 打卡区域 */
+.habit-checkin {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+  margin-bottom: 15rpx;
+}
+
+.checkin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5rpx;
+}
+
+.checkin-date {
+  font-size: 24rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.checkin-status {
+  font-size: 20rpx;
+}
+
+.checkin-status.checked {
+  color: #22c55e;
+}
+
+.checkin-status.unchecked {
+  color: #f59e0b;
+}
+
+.checkin-action {
+  display: flex;
+  align-items: center;
+}
+
+.checked-badge {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(34, 197, 94, 0.2);
+  border-radius: 20rpx;
+}
+
+.checked-icon {
+  font-size: 20rpx;
+}
+
+.checked-text {
+  font-size: 20rpx;
+  color: #22c55e;
+  font-weight: 500;
+}
+
+/* 进度条 */
+.habit-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-label {
+  font-size: 22rpx;
+  color: #a0a0a0;
+}
+
+.progress-text {
+  font-size: 22rpx;
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+.progress-bar {
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+}
+
+.empty-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 15rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #a0a0a0;
+  line-height: 1.4;
+  margin-bottom: 40rpx;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 40rpx;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid rgba(255, 255, 255, 0.3);
+  border-top: 6rpx solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #a0a0a0;
+  font-size: 28rpx;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15rpx;
+  }
+
+  .habit-checkin {
+    flex-direction: column;
+    gap: 15rpx;
+    align-items: stretch;
+  }
+
+  .checkin-action {
+    justify-content: center;
+  }
+}

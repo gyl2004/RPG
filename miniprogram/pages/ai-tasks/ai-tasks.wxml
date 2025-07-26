@@ -1,0 +1,207 @@
+<!-- AI任务推荐页面 -->
+<view class="ai-tasks-container">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-content">
+      <text class="page-title">🤖 AI智能推荐</text>
+      <text class="page-subtitle">基于你的行为模式和偏好，为你量身定制任务</text>
+      <view class="ai-model-info">
+        <text class="model-name">GPT-3.5 Turbo</text>
+        <text class="model-badge stable">稳定版</text>
+      </view>
+    </view>
+    <view class="header-actions">
+      <rpg-button
+        type="secondary"
+        text="{{refreshing ? '生成中...' : '🤖 AI重新生成'}}"
+        size="small"
+        disabled="{{refreshing}}"
+        bindtap="generateRealAIRecommendations"
+      />
+      <rpg-button
+        type="tertiary"
+        text="🔄 重置状态"
+        size="small"
+        bindtap="resetRecommendationStatus"
+      />
+    </view>
+  </view>
+
+  <!-- 用户状态概览 -->
+  <view class="status-overview" wx:if="{{emotionalState.metrics}}">
+    <text class="overview-title">当前状态分析</text>
+    <view class="status-grid">
+      <view class="status-item">
+        <text class="status-label">情感状态</text>
+        <text class="status-value">{{emotionalState.primaryEmotion === 'joyful' ? '😊 快乐' : emotionalState.primaryEmotion === 'energetic' ? '⚡ 充满活力' : emotionalState.primaryEmotion === 'confident' ? '💪 自信' : '😌 平衡'}}</text>
+      </view>
+      <view class="status-item">
+        <text class="status-label">动力值</text>
+        <text class="status-value">{{formatEmotionValue(emotionalState.metrics.motivation)}}</text>
+      </view>
+      <view class="status-item">
+        <text class="status-label">角色类型</text>
+        <text class="status-value">{{userProfile.characterType === 'warrior' ? '⚔️ 勇士' : userProfile.characterType === 'scholar' ? '📚 学者' : userProfile.characterType === 'artist' ? '🎨 艺术家' : userProfile.characterType === 'socialite' ? '👥 社交家' : '🗺️ 探险家'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI推荐任务列表 -->
+  <view class="recommendations-section">
+    <view class="section-header">
+      <text class="section-title">为你推荐的任务</text>
+      <text class="section-count" wx:if="{{aiTaskRecommendations.length > 0}}">{{aiTaskRecommendations.length}}个推荐</text>
+    </view>
+
+    <!-- 任务列表 -->
+    <view class="tasks-list" wx:if="{{aiTaskRecommendations.length > 0}}">
+      <view 
+        class="ai-task-card"
+        wx:for="{{aiTaskRecommendations}}"
+        wx:key="id"
+        wx:for-item="task"
+        wx:for-index="index"
+        data-task-index="{{index}}"
+        bindtap="viewTaskDetail"
+      >
+        <!-- 任务头部 -->
+        <view class="task-header">
+          <view class="task-info">
+            <text class="task-title">{{task.title}}</text>
+            <text class="task-description">{{task.description}}</text>
+          </view>
+          <view class="task-meta">
+            <view class="difficulty-badge {{task.difficulty}}">
+              <text class="difficulty-text">{{getDifficultyText(task.difficulty)}}</text>
+            </view>
+            <view class="priority-indicator">
+              <text class="priority-text">优先级 {{task.priority}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 任务详情 -->
+        <view class="task-details">
+          <view class="task-stats">
+            <view class="stat-item">
+              <text class="stat-icon">⏱️</text>
+              <text class="stat-text">{{task.estimatedTime}}分钟</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-icon">💰</text>
+              <text class="stat-text">{{task.estimatedReward.coins}}金币</text>
+            </view>
+            <view class="stat-item">
+              <text class="stat-icon">⭐</text>
+              <text class="stat-text">{{task.estimatedReward.experience}}经验</text>
+            </view>
+          </view>
+          
+          <view class="task-tags" wx:if="{{task.tags}}">
+            <text 
+              class="task-tag"
+              wx:for="{{task.tags}}"
+              wx:key="*this"
+              wx:for-item="tag"
+            >#{{tag}}</text>
+          </view>
+        </view>
+
+        <!-- AI推荐理由 -->
+        <view class="ai-reason">
+          <text class="reason-icon">💡</text>
+          <text class="reason-text">{{task.personalizedReason}}</text>
+        </view>
+
+        <!-- 操作按钮 -->
+        <view class="task-actions">
+          <rpg-button
+            wx:if="{{!task.isCreated}}"
+            type="primary"
+            text="创建任务"
+            size="small"
+            data-task-index="{{index}}"
+            bindtap="createAITask"
+            catchtap="true"
+          />
+          <view wx:else class="task-created">
+            <text class="created-icon">✅</text>
+            <text class="created-text">已创建</text>
+            <rpg-button
+              type="secondary"
+              text="查看任务"
+              size="small"
+              bindtap="goToTasks"
+              catchtap="true"
+            />
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-recommendations" wx:else>
+      <view class="empty-content">
+        <text class="empty-icon">🤖</text>
+        <text class="empty-title">AI正在为你分析</text>
+        <text class="empty-description">
+          基于你的行为模式、情感状态和角色类型，AI将为你生成个性化的任务推荐。
+          <br/>请稍等片刻或点击下方按钮立即生成。
+        </text>
+        
+        <view class="rate-limit-notice">
+          <text class="rate-limit-text">💡 使用ChatAnywhere提供的GPT-3.5服务</text>
+        </view>
+
+        <view class="empty-actions">
+          <rpg-button
+            type="primary"
+            text="🤖 使用真实AI生成"
+            bindtap="generateRealAIRecommendations"
+          />
+          <rpg-button
+            type="secondary"
+            text="📋 查看测试推荐"
+            bindtap="generateTestRecommendations"
+          />
+          <rpg-button
+            type="tertiary"
+            text="🔧 AI功能测试"
+            bindtap="goToAITest"
+          />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI推荐说明 -->
+  <view class="ai-explanation">
+    <text class="explanation-title">🧠 AI推荐原理</text>
+    <view class="explanation-content">
+      <view class="explanation-item">
+        <text class="explanation-icon">📊</text>
+        <text class="explanation-text">分析你的情感状态和动力水平</text>
+      </view>
+      <view class="explanation-item">
+        <text class="explanation-icon">🎭</text>
+        <text class="explanation-text">基于你的角色类型特征</text>
+      </view>
+      <view class="explanation-item">
+        <text class="explanation-icon">📈</text>
+        <text class="explanation-text">考虑你的成长需求和弱项</text>
+      </view>
+      <view class="explanation-item">
+        <text class="explanation-icon">🕐</text>
+        <text class="explanation-text">匹配你的活跃时间偏好</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-overlay" wx:if="{{loading}}">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">AI正在分析中...</text>
+    </view>
+  </view>
+</view>

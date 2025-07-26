@@ -1,0 +1,239 @@
+<!--个人资料页面-->
+<view class="profile-container">
+  <!-- 用户头像和基本信息 -->
+  <view class="profile-header">
+    <view class="header-background"></view>
+    <view class="avatar-section">
+      <view class="avatar-container">
+        <image
+          src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}"
+          class="user-avatar"
+          mode="aspectFill"
+        />
+        <view class="avatar-frame {{character.characterType || 'explorer'}}"></view>
+        <view class="level-badge">
+          <text class="level-number">{{character.level || 1}}</text>
+        </view>
+      </view>
+      <view class="online-status">
+        <view class="status-dot"></view>
+        <text class="status-text">在线</text>
+      </view>
+    </view>
+
+    <view class="user-basic-info">
+      <view class="name-section">
+        <text class="user-name">{{userInfo.nickname || '冒险者'}}</text>
+        <view class="character-type-badge {{character.characterType || 'explorer'}}">
+          <text class="character-icon">{{characterTypeInfo.icon}}</text>
+          <text class="character-name">{{characterTypeInfo.name}}</text>
+        </view>
+      </view>
+
+      <text class="user-title">{{characterTitle || '新手冒险者'}}</text>
+
+      <view class="level-section">
+        <view class="level-info">
+          <text class="level-text">等级 {{character.level || 1}}</text>
+          <text class="exp-text">{{character.currentExp || 0}} / {{character.nextLevelExp || 100}} EXP</text>
+        </view>
+        <view class="exp-bar">
+          <view class="exp-progress" style="width: {{expPercent}}%"></view>
+          <view class="exp-glow" style="width: {{expPercent}}%"></view>
+        </view>
+      </view>
+
+      <view class="resources-section">
+        <view class="resource-item">
+          <text class="resource-icon">💰</text>
+          <text class="resource-value">{{character.coins || 0}}</text>
+          <text class="resource-label">金币</text>
+        </view>
+        <view class="resource-item">
+          <text class="resource-icon">⭐</text>
+          <text class="resource-value">{{character.totalExp || 0}}</text>
+          <text class="resource-label">总经验</text>
+        </view>
+        <view class="resource-item">
+          <text class="resource-icon">🏆</text>
+          <text class="resource-value">{{statistics.achievementsUnlocked || 0}}</text>
+          <text class="resource-label">成就</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 角色属性 -->
+  <view class="attributes-section">
+    <view class="section-header">
+      <text class="section-title">角色属性</text>
+      <rpg-button
+        type="tertiary"
+        text="分配点数"
+        size="small"
+        bindtap="allocateAttributes"
+        wx:if="{{character.availableAttributePoints > 0}}"
+      />
+    </view>
+    <view class="attributes-grid">
+      <view
+        class="attribute-item"
+        wx:for="{{attributesList}}"
+        wx:key="id"
+        data-attribute="{{item.id}}"
+        bindtap="viewAttributeDetail"
+      >
+        <view class="attribute-header">
+          <text class="attribute-icon">{{item.icon}}</text>
+          <text class="attribute-name">{{item.name}}</text>
+          <text class="attribute-value">{{item.value}}</text>
+        </view>
+        <view class="attribute-bar">
+          <view class="attribute-progress" style="width: {{item.percent}}%; background-color: {{item.color}}"></view>
+        </view>
+        <text class="attribute-description">{{item.description}}</text>
+      </view>
+    </view>
+    <view wx:if="{{character.availableAttributePoints > 0}}" class="available-points">
+      <text class="points-text">可分配点数: {{character.availableAttributePoints}}</text>
+    </view>
+  </view>
+
+  <!-- 统计数据 -->
+  <view class="stats-section">
+    <text class="section-title">成长记录</text>
+    <view class="stats-grid">
+      <view class="stat-item" bindtap="viewStatistics">
+        <view class="stat-icon">📋</view>
+        <text class="stat-number">{{statistics.tasksCompleted || 0}}</text>
+        <text class="stat-label">任务完成</text>
+      </view>
+      <view class="stat-item" bindtap="viewStatistics">
+        <view class="stat-icon">🔄</view>
+        <text class="stat-number">{{statistics.habitsFormed || 0}}</text>
+        <text class="stat-label">习惯养成</text>
+      </view>
+      <view class="stat-item" bindtap="viewStatistics">
+        <view class="stat-icon">🏆</view>
+        <text class="stat-number">{{statistics.achievementsUnlocked || 0}}</text>
+        <text class="stat-label">成就解锁</text>
+      </view>
+      <view class="stat-item" bindtap="viewStatistics">
+        <view class="stat-icon">📅</view>
+        <text class="stat-number">{{statistics.loginDays || 0}}</text>
+        <text class="stat-label">登录天数</text>
+      </view>
+      <view class="stat-item" bindtap="viewStatistics">
+        <view class="stat-icon">⚡</view>
+        <text class="stat-number">{{statistics.maxStreak || 0}}</text>
+        <text class="stat-label">最长连击</text>
+      </view>
+      <view class="stat-item" bindtap="viewStatistics">
+        <view class="stat-icon">🎯</view>
+        <text class="stat-number">{{statistics.perfectDays || 0}}</text>
+        <text class="stat-label">完美天数</text>
+      </view>
+      <view class="stat-item" bindtap="goToItemCollection">
+        <view class="stat-icon">🎒</view>
+        <text class="stat-number">{{character.collectedItems.length || 0}}</text>
+        <text class="stat-label">收藏物品</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近活动 -->
+  <view class="recent-activity-section">
+    <text class="section-title">最近活动</text>
+    <view class="activity-list">
+      <view
+        class="activity-item"
+        wx:for="{{recentActivities}}"
+        wx:key="id"
+      >
+        <view class="activity-icon">{{item.icon}}</view>
+        <view class="activity-content">
+          <text class="activity-title">{{item.title}}</text>
+          <text class="activity-description">{{item.description}}</text>
+          <text class="activity-time">{{item.timeAgo}}</text>
+        </view>
+        <view class="activity-reward" wx:if="{{item.reward}}">
+          <text class="reward-text">+{{item.reward}}</text>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{recentActivities.length === 0}}" class="empty-activity">
+      <text class="empty-text">暂无最近活动</text>
+    </view>
+  </view>
+
+  <!-- 快速操作 -->
+  <view class="actions-section">
+    <text class="section-title">快速操作</text>
+    <view class="action-grid">
+      <view class="action-item" bindtap="goToCharacter">
+        <view class="action-icon">👤</view>
+        <text class="action-text">角色详情</text>
+      </view>
+      <view class="action-item" bindtap="viewAchievements">
+        <view class="action-icon">🏆</view>
+        <text class="action-text">成就系统</text>
+      </view>
+      <view class="action-item" bindtap="goToSkills">
+        <view class="action-icon">⚡</view>
+        <text class="action-text">技能树</text>
+      </view>
+      <view class="action-item" bindtap="goToAppearance">
+        <view class="action-icon">🎨</view>
+        <text class="action-text">外观定制</text>
+      </view>
+      <view class="action-item" bindtap="viewStatistics">
+        <view class="action-icon">📊</view>
+        <text class="action-text">数据统计</text>
+      </view>
+      <view class="action-item" bindtap="goToSettings">
+        <view class="action-icon">⚙️</view>
+        <text class="action-text">设置</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 个人信息 -->
+  <view class="info-section">
+    <text class="section-title">账户信息</text>
+    <view class="info-list">
+      <view class="info-item">
+        <view class="info-icon">🆔</view>
+        <text class="info-label">用户ID</text>
+        <text class="info-value">{{userInfo._id ? userInfo._id.slice(-8) : 'Unknown'}}</text>
+      </view>
+      <view class="info-item">
+        <view class="info-icon">📅</view>
+        <text class="info-label">注册时间</text>
+        <text class="info-value">{{userInfo.registrationDate ? userInfo.registrationDate.slice(0, 10) : '未知'}}</text>
+      </view>
+      <view class="info-item">
+        <view class="info-icon">🕐</view>
+        <text class="info-label">最后登录</text>
+        <text class="info-value">{{userInfo.lastLoginDate ? userInfo.lastLoginDate.slice(0, 10) : '未知'}}</text>
+      </view>
+      <view class="info-item">
+        <view class="info-icon">⭐</view>
+        <text class="info-label">总经验值</text>
+        <text class="info-value">{{statistics.experienceGained || 0}}</text>
+      </view>
+      <view class="info-item">
+        <view class="info-icon">🎯</view>
+        <text class="info-label">角色类型</text>
+        <text class="info-value">{{characterTypeInfo.name || '探险家'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-overlay">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>

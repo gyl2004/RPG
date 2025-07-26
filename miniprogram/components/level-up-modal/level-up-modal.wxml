@@ -1,0 +1,122 @@
+<!--升级动画模态框-->
+<view class="level-up-overlay" wx:if="{{show}}" bindtap="closeModal">
+  <view class="level-up-container {{animationClass}}" catchtap="">
+    
+    <!-- 升级动画阶段 -->
+    <view class="level-up-animation" wx:if="{{animationStep === 1}}">
+      <view class="level-up-burst">
+        <view class="burst-ring ring-1"></view>
+        <view class="burst-ring ring-2"></view>
+        <view class="burst-ring ring-3"></view>
+      </view>
+      
+      <view class="level-up-text">
+        <text class="level-up-title">LEVEL UP!</text>
+        <text class="level-change">{{levelUpData.oldLevel}} → {{levelUpData.newLevel}}</text>
+      </view>
+      
+      <view class="level-up-effects">
+        <view class="effect-particle" wx:for="{{[1,2,3,4,5,6,7,8]}}" wx:key="*this"></view>
+      </view>
+    </view>
+
+    <!-- 奖励展示阶段 -->
+    <view class="rewards-display" wx:if="{{animationStep === 2}}">
+      <view class="rewards-header">
+        <text class="rewards-title">🎉 升级奖励 🎉</text>
+        <text class="level-info">恭喜升级到 {{levelUpData.newLevel}} 级！</text>
+      </view>
+
+      <view class="rewards-list">
+        <!-- 属性点奖励 -->
+        <view class="reward-item attribute-points" wx:if="{{levelUpData.attributePoints > 0}}">
+          <view class="reward-icon">🎯</view>
+          <view class="reward-content">
+            <text class="reward-name">属性点</text>
+            <text class="reward-amount">+{{levelUpData.attributePoints}}</text>
+          </view>
+        </view>
+
+        <!-- 技能点奖励 -->
+        <view class="reward-item skill-points" wx:if="{{levelUpData.skillPoints > 0}}">
+          <view class="reward-icon">⭐</view>
+          <view class="reward-content">
+            <text class="reward-name">技能点</text>
+            <text class="reward-amount">+{{levelUpData.skillPoints}}</text>
+          </view>
+        </view>
+
+        <!-- 经验值奖励 -->
+        <view class="reward-item experience" wx:if="{{levelUpData.expGain > 0}}">
+          <view class="reward-icon">✨</view>
+          <view class="reward-content">
+            <text class="reward-name">经验值</text>
+            <text class="reward-amount">+{{levelUpData.expGain}}</text>
+          </view>
+        </view>
+
+        <!-- 物品奖励 -->
+        <view 
+          class="reward-item item" 
+          wx:for="{{levelUpData.rewards.items}}" 
+          wx:key="id"
+          data-reward="{{item}}"
+          bindtap="viewRewardDetail"
+        >
+          <view class="reward-icon">{{item.icon}}</view>
+          <view class="reward-content">
+            <text class="reward-name">{{item.name}}</text>
+            <text class="reward-desc">{{item.description}}</text>
+          </view>
+        </view>
+
+        <!-- 技能点奖励 -->
+        <view 
+          class="reward-item skill" 
+          wx:for="{{levelUpData.rewards.skills}}" 
+          wx:key="id"
+        >
+          <view class="reward-icon">{{item.icon}}</view>
+          <view class="reward-content">
+            <text class="reward-name">{{item.name}}</text>
+            <text class="reward-desc">{{item.description}}</text>
+          </view>
+        </view>
+
+        <!-- 称号奖励 -->
+        <view 
+          class="reward-item title" 
+          wx:for="{{levelUpData.rewards.titles}}" 
+          wx:key="*this"
+        >
+          <view class="reward-icon">👑</view>
+          <view class="reward-content">
+            <text class="reward-name">新称号</text>
+            <text class="reward-title">{{item}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="rewards-actions">
+        <rpg-button 
+          type="secondary" 
+          text="分享成就" 
+          size="small"
+          bindtap="shareAchievement"
+        />
+        <rpg-button 
+          type="primary" 
+          text="继续冒险" 
+          size="small"
+          bindtap="continueAdventure"
+        />
+      </view>
+    </view>
+
+    <!-- 关闭按钮 -->
+    <view class="close-button" bindtap="closeModal">
+      <text class="close-icon">×</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,161 @@
+<!-- 故事书UI组件 -->
+<view class="story-book-container">
+  <!-- 进度条 -->
+  <view class="story-progress" wx:if="{{showProgress}}">
+    <view class="progress-info">
+      <text class="progress-label">故事进度</text>
+      <text class="progress-value">{{formatProgress(progress.totalProgress)}}%</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{progress.totalProgress || 0}}%"></view>
+    </view>
+  </view>
+
+  <!-- 时间线模式 -->
+  <view class="timeline-mode" wx:if="{{mode === 'timeline'}}">
+    <view class="timeline-container">
+      <view 
+        class="timeline-item {{getChapterStatus(chapter)}}"
+        wx:for="{{chapters}}"
+        wx:key="id"
+        wx:for-item="chapter"
+        data-chapter-id="{{chapter.id}}"
+        bindtap="onChapterTap"
+      >
+        <view class="timeline-marker">
+          <view class="marker-dot">
+            <text class="marker-icon">{{getChapterIcon(chapter)}}</text>
+          </view>
+          <view class="marker-line" wx:if="{{index < chapters.length - 1}}"></view>
+        </view>
+        
+        <view class="timeline-content">
+          <view class="chapter-header">
+            <text class="chapter-title">{{chapter.title}}</text>
+            <view class="chapter-type {{chapter.type}}">
+              <text class="type-text">{{chapter.type}}</text>
+            </view>
+          </view>
+          <text class="chapter-description">{{chapter.description}}</text>
+          <view class="chapter-meta" wx:if="{{getChapterStatus(chapter) !== 'locked'}}">
+            <text class="chapter-order">第{{chapter.order}}章</text>
+            <view class="chapter-rewards" wx:if="{{chapter.rewards}}">
+              <text class="reward-item" wx:if="{{chapter.rewards.coins}}">💰{{chapter.rewards.coins}}</text>
+              <text class="reward-item" wx:if="{{chapter.rewards.experience}}">⭐{{chapter.rewards.experience}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 书本模式 -->
+  <view class="book-mode" wx:if="{{mode === 'book'}}">
+    <view class="book-container {{bookOpen ? 'open' : 'closed'}}" bindtap="toggleBook">
+      <view class="book-cover" wx:if="{{!bookOpen}}">
+        <view class="cover-content">
+          <text class="book-title">我的成长故事</text>
+          <text class="book-subtitle">{{chapters.length}}个章节的冒险之旅</text>
+          <view class="cover-decoration">
+            <text class="decoration-icon">📖</text>
+          </view>
+          <text class="open-hint">点击打开</text>
+        </view>
+      </view>
+      
+      <view class="book-pages" wx:if="{{bookOpen}}">
+        <view class="page-container {{isAnimating ? 'animating' : ''}}">
+          <!-- 左页 -->
+          <view class="page left-page" wx:if="{{hasPrevPage()}}">
+            <view class="page-content">
+              <text class="page-number">{{currentPage}}</text>
+              <view class="chapter-preview">
+                <text class="preview-title">上一章</text>
+                <text class="preview-content">{{chapters[currentPage - 1].title}}</text>
+              </view>
+            </view>
+          </view>
+          
+          <!-- 右页 -->
+          <view class="page right-page">
+            <view class="page-content" wx:if="{{getCurrentChapter()}}">
+              <text class="page-number">{{currentPage + 1}}</text>
+              <view class="chapter-full">
+                <text class="chapter-title">{{getCurrentChapter().title}}</text>
+                <text class="chapter-content">{{getCurrentChapter().content}}</text>
+                <view class="chapter-status">
+                  <text class="status-text">状态：{{getChapterStatus(getCurrentChapter()) === 'completed' ? '已完成' : getChapterStatus(getCurrentChapter()) === 'unlocked' ? '可阅读' : '未解锁'}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 翻页控制 -->
+        <view class="page-controls">
+          <view class="control-btn prev-btn {{!hasPrevPage() ? 'disabled' : ''}}" bindtap="prevPage">
+            <text class="control-icon">‹</text>
+          </view>
+          <view class="page-indicator">
+            <text class="current-page">{{currentPage + 1}}</text>
+            <text class="total-pages">/ {{chapters.length}}</text>
+          </view>
+          <view class="control-btn next-btn {{!hasNextPage() ? 'disabled' : ''}}" bindtap="nextPage">
+            <text class="control-icon">›</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 卡片模式 -->
+  <view class="card-mode" wx:if="{{mode === 'card'}}">
+    <view class="cards-container">
+      <view 
+        class="story-card {{getChapterStatus(chapter)}}"
+        wx:for="{{chapters}}"
+        wx:key="id"
+        wx:for-item="chapter"
+        data-chapter-id="{{chapter.id}}"
+        bindtap="onChapterTap"
+      >
+        <view class="card-header">
+          <view class="card-icon">
+            <text class="icon-text">{{getChapterIcon(chapter)}}</text>
+          </view>
+          <view class="card-info">
+            <text class="card-title">{{chapter.title}}</text>
+            <text class="card-type">{{chapter.type}}</text>
+          </view>
+          <view class="card-order">
+            <text class="order-text">{{chapter.order}}</text>
+          </view>
+        </view>
+        
+        <view class="card-content">
+          <text class="card-description">{{chapter.description}}</text>
+        </view>
+        
+        <view class="card-footer" wx:if="{{getChapterStatus(chapter) !== 'locked'}}">
+          <view class="card-rewards" wx:if="{{chapter.rewards}}">
+            <text class="reward-label">奖励：</text>
+            <text class="reward-value" wx:if="{{chapter.rewards.coins}}">{{chapter.rewards.coins}}金币</text>
+            <text class="reward-value" wx:if="{{chapter.rewards.experience}}">{{chapter.rewards.experience}}经验</text>
+          </view>
+          <view class="card-status">
+            <text class="status-badge {{getChapterStatus(chapter)}}">
+              {{getChapterStatus(chapter) === 'completed' ? '已完成' : getChapterStatus(chapter) === 'unlocked' ? '可阅读' : '未解锁'}}
+            </text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-story" wx:if="{{chapters.length === 0}}">
+    <text class="empty-icon">📚</text>
+    <text class="empty-text">暂无故事章节</text>
+    <text class="empty-hint">开始你的冒险之旅，创造属于自己的故事！</text>
+  </view>
+</view>

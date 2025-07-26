@@ -1,0 +1,358 @@
+/* 现实世界RPG首页样式 */
+
+page {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #ffffff;
+  min-height: 100vh;
+}
+
+.container {
+  padding: 20rpx;
+  font-family: 'PingFang SC', sans-serif;
+}
+
+/* 角色信息区域 */
+.character-info {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.character-avatar {
+  position: relative;
+  margin-right: 30rpx;
+}
+
+.avatar-image {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  border: 4rpx solid #3b82f6;
+}
+
+.level-badge {
+  position: absolute;
+  bottom: -10rpx;
+  right: -10rpx;
+  background: #3b82f6;
+  color: white;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+.character-details {
+  flex: 1;
+}
+
+.character-name {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+
+.character-class {
+  display: block;
+  font-size: 28rpx;
+  color: #a0a0a0;
+  margin-bottom: 15rpx;
+}
+
+.friend-code-display {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 15rpx;
+}
+
+.friend-code-label {
+  font-size: 20rpx;
+  color: #a0a0a0;
+}
+
+.friend-code-value {
+  font-size: 20rpx;
+  color: #3b82f6;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2rpx;
+}
+
+.exp-bar {
+  position: relative;
+  background: rgba(255, 255, 255, 0.2);
+  height: 20rpx;
+  border-radius: 10rpx;
+  overflow: hidden;
+}
+
+.exp-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 10rpx;
+  transition: width 0.3s ease;
+}
+
+.exp-text {
+  position: absolute;
+  top: 25rpx;
+  left: 0;
+  font-size: 24rpx;
+  color: #a0a0a0;
+}
+
+/* 今日任务区域 */
+.today-tasks {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.task-count {
+  color: #3b82f6;
+  font-size: 28rpx;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+}
+
+.task-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 30rpx;
+  background: rgba(59, 130, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  font-size: 32rpx;
+  color: #3b82f6;
+}
+
+.task-icon.completed {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.task-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-title {
+  font-size: 28rpx;
+}
+
+.task-reward {
+  font-size: 24rpx;
+  color: #fbbf24;
+}
+
+.add-task {
+  padding: 20rpx;
+  text-align: center;
+  color: #3b82f6;
+  font-size: 28rpx;
+  border: 2rpx dashed #3b82f6;
+  border-radius: 15rpx;
+}
+
+/* 习惯打卡区域 */
+.habits-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.habit-streak {
+  color: #22c55e;
+  font-size: 28rpx;
+}
+
+.habit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.habit-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+}
+
+.habit-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 30rpx;
+  background: rgba(139, 92, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  font-size: 32rpx;
+  color: #8b5cf6;
+}
+
+.habit-icon.completed {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.habit-name {
+  flex: 1;
+  font-size: 28rpx;
+}
+
+.habit-streak {
+  font-size: 24rpx;
+  color: #22c55e;
+}
+
+/* 快速操作区域 */
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 15rpx;
+}
+
+.action-button {
+  width: calc(25% - 12rpx);
+  min-width: 120rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 25rpx 15rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  backdrop-filter: blur(10rpx);
+  position: relative;
+}
+
+.action-icon {
+  font-size: 48rpx;
+  margin-bottom: 10rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #a0a0a0;
+}
+
+/* AI按钮特殊样式 */
+.ai-button {
+  position: relative;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+  border: 2rpx solid rgba(59, 130, 246, 0.5);
+}
+
+.ai-button:active {
+  background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+}
+
+.ai-button .action-text {
+  color: #ffffff;
+}
+
+.ai-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  background: #3b82f6;
+  color: #ffffff;
+  font-size: 16rpx;
+  padding: 2rpx 6rpx;
+  border-radius: 8rpx;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(59, 130, 246, 0.3);
+}
+
+/* 物品收藏按钮样式 */
+.collection-button {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  border: 2rpx solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8rpx 32rpx rgba(139, 92, 246, 0.3);
+}
+
+.collection-button:active {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+}
+
+.collection-button .action-text {
+  color: #ffffff;
+}
+
+.collection-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 16rpx;
+  padding: 2rpx 6rpx;
+  border-radius: 8rpx;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(16, 185, 129, 0.3);
+}
+
+
+
+/* 动态故事按钮样式 */
+.action-button.story-button {
+  background: rgba(139, 92, 246, 0.2);
+  border: 2rpx solid rgba(139, 92, 246, 0.3);
+}
+
+.action-button.story-button:active {
+  background: rgba(139, 92, 246, 0.3);
+}
+
+.story-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  background: #8b5cf6;
+  color: #ffffff;
+  font-size: 16rpx;
+  padding: 2rpx 6rpx;
+  border-radius: 8rpx;
+  font-weight: bold;
+  box-shadow: 0 2rpx 8rpx rgba(139, 92, 246, 0.3);
+}
+
+

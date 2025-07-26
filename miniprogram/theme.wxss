@@ -1,0 +1,145 @@
+/* TDesign主题配置 - 现实世界RPG风格 */
+
+/* 主色调配置 */
+:root {
+  --td-brand-color: #3b82f6;
+  --td-brand-color-1: #1e40af;
+  --td-brand-color-2: #2563eb;
+  --td-brand-color-3: #3b82f6;
+  --td-brand-color-4: #60a5fa;
+  --td-brand-color-5: #93c5fd;
+  --td-brand-color-6: #bfdbfe;
+  --td-brand-color-7: #dbeafe;
+  --td-brand-color-8: #eff6ff;
+  --td-brand-color-9: #f8fafc;
+  
+  --td-success-color: #22c55e;
+  --td-warning-color: #fbbf24;
+  --td-error-color: #ef4444;
+  
+  --td-bg-color-page: #1a1a2e;
+  --td-bg-color-container: rgba(255, 255, 255, 0.1);
+  --td-bg-color-card: rgba(255, 255, 255, 0.05);
+  
+  --td-text-color-primary: #ffffff;
+  --td-text-color-secondary: #a0a0a0;
+  --td-text-color-placeholder: #6b7280;
+  
+  --td-border-radius-default: 20rpx;
+  --td-border-radius-medium: 15rpx;
+  --td-border-radius-small: 10rpx;
+}
+
+/* 按钮样式重写 */
+.t-button {
+  border-radius: var(--td-border-radius-default) !important;
+  font-weight: bold !important;
+}
+
+.t-button--theme-primary {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6) !important;
+  border: none !important;
+}
+
+.t-button--theme-default {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  border: 2rpx solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* 输入框样式重写 */
+.t-input {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 2rpx solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: var(--td-border-radius-default) !important;
+  color: white !important;
+}
+
+.t-input__control {
+  color: white !important;
+}
+
+.t-input--focused {
+  border-color: var(--td-brand-color) !important;
+}
+
+/* 单元格样式重写 */
+.t-cell {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: var(--td-border-radius-medium) !important;
+  margin-bottom: 20rpx !important;
+}
+
+.t-cell__title {
+  color: white !important;
+}
+
+.t-cell__note {
+  color: var(--td-text-color-secondary) !important;
+}
+
+/* 标签页样式重写 */
+.t-tabs {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--td-border-radius-default) !important;
+}
+
+.t-tab-panel {
+  color: white !important;
+}
+
+/* 进度条样式重写 */
+.t-progress {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 10rpx !important;
+}
+
+.t-progress__bar {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6) !important;
+  border-radius: 10rpx !important;
+}
+
+/* 头像样式重写 */
+.t-avatar {
+  border: 4rpx solid var(--td-brand-color) !important;
+}
+
+/* 徽章样式重写 */
+.t-badge {
+  background: var(--td-brand-color) !important;
+  color: white !important;
+  font-weight: bold !important;
+}
+
+/* 图标样式重写 */
+.t-icon {
+  color: var(--td-brand-color) !important;
+}
+
+/* 加载样式重写 */
+.t-loading {
+  color: var(--td-brand-color) !important;
+}
+
+/* 对话框样式重写 */
+.t-dialog {
+  background: var(--td-bg-color-container) !important;
+  border-radius: var(--td-border-radius-default) !important;
+  backdrop-filter: blur(10rpx) !important;
+}
+
+.t-dialog__header {
+  color: white !important;
+}
+
+.t-dialog__body {
+  color: var(--td-text-color-secondary) !important;
+}
+
+/* Toast样式重写 */
+.t-toast {
+  background: var(--td-bg-color-container) !important;
+  color: white !important;
+  border-radius: var(--td-border-radius-default) !important;
+  backdrop-filter: blur(10rpx) !important;
+}

@@ -1,0 +1,212 @@
+<!--奖励中心页面-->
+<view class="rewards-container">
+  <!-- 页面头部 -->
+  <view class="rewards-header">
+    <text class="page-title">奖励中心</text>
+    <view class="currency-display">
+      <view class="currency-item">
+        <text class="currency-icon">💰</text>
+        <text class="currency-amount">{{userRewards.coins || 0}}</text>
+      </view>
+      <view class="currency-item">
+        <text class="currency-icon">⭐</text>
+        <text class="currency-amount">Lv.{{userRewards.level || 1}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 标签页导航 -->
+  <view class="tab-navigation">
+    <scroll-view class="tab-scroll" scroll-x="true">
+      <view class="tab-list">
+        <view 
+          class="tab-item {{currentTab === item.id ? 'active' : ''}}"
+          wx:for="{{tabs}}"
+          wx:key="id"
+          data-tab="{{item.id}}"
+          bindtap="switchTab"
+        >
+          <text class="tab-icon">{{item.icon}}</text>
+          <text class="tab-text">{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 概览页面 -->
+  <view class="tab-content" wx:if="{{currentTab === 'overview'}}">
+    <!-- 等级进度 -->
+    <view class="level-section">
+      <text class="section-title">等级进度</text>
+      <view class="level-card">
+        <view class="level-info">
+          <text class="level-current">Lv.{{userRewards.level || 1}}</text>
+          <text class="level-next">→ Lv.{{(userRewards.level || 1) + 1}}</text>
+        </view>
+        <view class="exp-progress">
+          <view class="exp-bar">
+            <view 
+              class="exp-fill" 
+              style="width: {{userRewards.levelProgress || 0}}%"
+            ></view>
+          </view>
+          <text class="exp-text">
+            {{userRewards.currentLevelExp || 0}} / {{userRewards.nextLevelRequiredExp || 100}}
+          </text>
+        </view>
+        <text class="exp-to-next">还需 {{userRewards.expToNext || 100}} 经验升级</text>
+      </view>
+    </view>
+
+    <!-- 统计信息 -->
+    <view class="stats-section">
+      <text class="section-title">统计信息</text>
+      <view class="stats-grid">
+        <view class="stat-card">
+          <text class="stat-icon">💰</text>
+          <text class="stat-number">{{userRewards.statistics.totalCoinsEarned || 0}}</text>
+          <text class="stat-label">总金币</text>
+        </view>
+        <view class="stat-card">
+          <text class="stat-icon">⭐</text>
+          <text class="stat-number">{{userRewards.statistics.totalExpEarned || 0}}</text>
+          <text class="stat-label">总经验</text>
+        </view>
+        <view class="stat-card">
+          <text class="stat-icon">📋</text>
+          <text class="stat-number">{{userRewards.statistics.totalTasksCompleted || 0}}</text>
+          <text class="stat-label">完成任务</text>
+        </view>
+        <view class="stat-card">
+          <text class="stat-icon">🏆</text>
+          <text class="stat-number">{{userRewards.statistics.achievementsUnlocked || 0}}</text>
+          <text class="stat-label">解锁成就</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 背包页面 -->
+  <view class="tab-content" wx:if="{{currentTab === 'inventory'}}">
+    <view class="inventory-section">
+      <text class="section-title">我的背包</text>
+      <view class="inventory-grid" wx:if="{{getInventoryItems().length > 0}}">
+        <view 
+          class="item-card"
+          wx:for="{{getInventoryItems()}}"
+          wx:key="id"
+          wx:for-item="item"
+        >
+          <view class="item-header">
+            <text class="item-icon">{{item.icon}}</text>
+            <view class="item-rarity {{item.rarity}}" wx:if="{{itemRarities && itemRarities[item.rarity]}}">
+              <text class="rarity-icon">{{itemRarities[item.rarity].icon}}</text>
+            </view>
+          </view>
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-description">{{item.description}}</text>
+          <view class="item-footer">
+            <text class="item-count">x{{item.count}}</text>
+            <rpg-button 
+              wx:if="{{item.type === 'consumable'}}"
+              type="accent" 
+              text="使用" 
+              size="mini"
+              data-item-id="{{item.id}}"
+              bindtap="useItem"
+            />
+          </view>
+        </view>
+      </view>
+      <view class="empty-inventory" wx:else>
+        <text class="empty-icon">🎒</text>
+        <text class="empty-text">背包空空如也</text>
+        <text class="empty-hint">完成任务或购买物品来填充背包吧！</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 成就页面 -->
+  <view class="tab-content" wx:if="{{currentTab === 'achievements'}}">
+    <view class="achievements-section">
+      <text class="section-title">成就系统</text>
+      <view class="achievements-list">
+        <view 
+          class="achievement-card {{item.isUnlocked ? 'unlocked' : 'locked'}}"
+          wx:for="{{getAchievementsList()}}"
+          wx:key="id"
+          wx:for-item="achievement"
+        >
+          <view class="achievement-header">
+            <text class="achievement-icon">{{achievement.icon}}</text>
+            <view class="achievement-info">
+              <text class="achievement-name">{{achievement.name}}</text>
+              <text class="achievement-description">{{achievement.description}}</text>
+            </view>
+            <view class="achievement-status">
+              <text class="status-icon" wx:if="{{achievement.isUnlocked}}">✅</text>
+              <text class="status-text" wx:else>{{achievement.progress}}%</text>
+            </view>
+          </view>
+          <view class="achievement-progress" wx:if="{{!achievement.isUnlocked}}">
+            <view class="progress-bar">
+              <view 
+                class="progress-fill" 
+                style="width: {{achievement.progress}}%"
+              ></view>
+            </view>
+          </view>
+          <view class="achievement-rewards" wx:if="{{achievement.isUnlocked}}">
+            <text class="rewards-text">
+              奖励：{{achievement.rewards.coins}}金币 {{achievement.rewards.exp}}经验
+            </text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商店页面 -->
+  <view class="tab-content" wx:if="{{currentTab === 'shop'}}">
+    <view class="shop-section">
+      <text class="section-title">神秘商店</text>
+      <view class="shop-grid">
+        <view 
+          class="shop-item"
+          wx:for="{{predefinedItems}}"
+          wx:key="id"
+          wx:for-item="item"
+        >
+          <view class="item-header">
+            <text class="item-icon">{{item.icon}}</text>
+            <view class="item-rarity {{item.rarity}}" wx:if="{{itemRarities && itemRarities[item.rarity]}}">
+              <text class="rarity-icon">{{itemRarities[item.rarity].icon}}</text>
+            </view>
+          </view>
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-description">{{item.description}}</text>
+          <view class="item-footer">
+            <view class="item-price">
+              <text class="price-icon">💰</text>
+              <text class="price-amount">{{item.price}}</text>
+            </view>
+            <rpg-button 
+              type="primary" 
+              text="购买" 
+              size="mini"
+              disabled="{{userRewards.coins < item.price}}"
+              data-item-id="{{item.id}}"
+              bindtap="buyItem"
+            />
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

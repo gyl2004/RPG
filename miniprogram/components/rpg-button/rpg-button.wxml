@@ -1,0 +1,10 @@
+<view 
+  class="rpg-button rpg-button--{{type}} rpg-button--{{size}} {{disabled ? 'rpg-button--disabled' : ''}} {{loading ? 'rpg-button--loading' : ''}}"
+  bindtap="onTap"
+>
+  <view wx:if="{{loading}}" class="rpg-button__loading">
+    <view class="loading-spinner"></view>
+  </view>
+  <text class="rpg-button__text">{{text}}</text>
+  <slot></slot>
+</view>

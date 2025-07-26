@@ -1,0 +1,608 @@
+/* 角色页面样式 */
+
+.character-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20rpx;
+}
+
+/* 角色头部信息 */
+.character-header {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 25rpx;
+  padding: 40rpx 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+
+
+.character-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.character-basic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.character-name {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #ffffff;
+  text-align: center;
+}
+
+.character-title {
+  font-size: 24rpx;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  text-align: center;
+}
+
+.character-class {
+  font-size: 22rpx;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 6rpx 12rpx;
+  border-radius: 15rpx;
+  text-align: center;
+}
+
+.character-level {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  padding: 10rpx 20rpx;
+  border-radius: 25rpx;
+  text-align: center;
+  border: 2rpx solid rgba(251, 191, 36, 0.3);
+}
+
+/* 经验值条 */
+.exp-section {
+  margin-top: 15rpx;
+}
+
+.exp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.exp-label {
+  font-size: 22rpx;
+  color: #a0a0a0;
+}
+
+.exp-remaining {
+  font-size: 20rpx;
+  color: #fbbf24;
+}
+
+.exp-bar {
+  width: 100%;
+  height: 16rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8rpx;
+  overflow: hidden;
+  margin-bottom: 8rpx;
+  border: 1rpx solid rgba(59, 130, 246, 0.3);
+}
+
+.exp-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: 8rpx;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10rpx rgba(59, 130, 246, 0.3);
+}
+
+.exp-text {
+  font-size: 20rpx;
+  color: #a0a0a0;
+  text-align: center;
+}
+
+/* 统计行 */
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15rpx;
+}
+
+.level-tier {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8rpx 15rpx;
+  border-radius: 20rpx;
+}
+
+.tier-icon {
+  font-size: 24rpx;
+}
+
+.tier-name {
+  font-size: 22rpx;
+  font-weight: bold;
+}
+
+/* 战斗力 */
+.power-section {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.power-label {
+  font-size: 22rpx;
+  color: #a0a0a0;
+}
+
+.power-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ef4444;
+  text-shadow: 0 0 10rpx rgba(239, 68, 68, 0.3);
+}
+
+/* 属性点提示 */
+.points-notice {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1rpx solid rgba(251, 191, 36, 0.3);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.notice-icon {
+  font-size: 32rpx;
+}
+
+.notice-text {
+  font-size: 26rpx;
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+/* 属性区域 */
+.attributes-section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.points-display {
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.points-text {
+  font-size: 20rpx;
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+.attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.attribute-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 25rpx;
+  backdrop-filter: blur(10rpx);
+  transition: all 0.3s ease;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.attribute-item:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.attribute-header {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 15rpx;
+}
+
+.attribute-icon {
+  font-size: 28rpx;
+}
+
+.attribute-name {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.attribute-value {
+  margin-bottom: 10rpx;
+}
+
+.value-number {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 8rpx;
+}
+
+.value-bar {
+  width: 100%;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.value-progress {
+  height: 100%;
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+.attribute-level {
+  font-size: 20rpx;
+  color: #a0a0a0;
+  text-align: center;
+  display: block;
+}
+
+/* 操作按钮 */
+.actions-section {
+  margin-bottom: 30rpx;
+}
+
+.action-row {
+  display: flex;
+  gap: 15rpx;
+  margin-bottom: 25rpx;
+}
+
+.action-row rpg-button {
+  flex: 1;
+}
+
+.test-actions {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.test-label {
+  display: block;
+  font-size: 24rpx;
+  color: #a0a0a0;
+  margin-bottom: 15rpx;
+  text-align: center;
+}
+
+.test-buttons {
+  display: flex;
+  gap: 15rpx;
+}
+
+.test-buttons rpg-button {
+  flex: 1;
+}
+
+/* 属性详情模态框 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 40rpx;
+}
+
+.attribute-modal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 25rpx;
+  padding: 40rpx;
+  max-width: 600rpx;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.modal-icon {
+  font-size: 48rpx;
+}
+
+.modal-content {
+  margin-bottom: 30rpx;
+}
+
+.attribute-description {
+  display: block;
+  font-size: 28rpx;
+  color: #a0a0a0;
+  line-height: 1.5;
+  margin-bottom: 25rpx;
+}
+
+.current-value {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.value-label {
+  font-size: 26rpx;
+  color: #a0a0a0;
+}
+
+.value-number {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.value-bar-large {
+  width: 100%;
+  height: 20rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10rpx;
+  overflow: hidden;
+  margin-bottom: 25rpx;
+}
+
+.value-progress-large {
+  height: 100%;
+  border-radius: 10rpx;
+  transition: width 0.3s ease;
+}
+
+.attribute-effects {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+  padding: 20rpx;
+}
+
+.effects-title {
+  display: block;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 10rpx;
+}
+
+.effects-text {
+  font-size: 22rpx;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15rpx;
+  margin-bottom: 20rpx;
+}
+
+.modal-actions rpg-button {
+  flex: 1;
+}
+
+.modal-close {
+  display: flex;
+  justify-content: center;
+}
+
+.modal-close rpg-button {
+  width: 200rpx;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 40rpx;
+  text-align: center;
+  backdrop-filter: blur(10rpx);
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid rgba(255, 255, 255, 0.3);
+  border-top: 6rpx solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .character-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 20rpx;
+  }
+
+
+
+  .attributes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+}
+
+/* 属性分配样式 */
+.attribute-item.allocating {
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.allocation-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  margin: 15rpx 0;
+  padding: 15rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10rpx;
+}
+
+.allocation-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.allocation-btn:active {
+  transform: scale(0.95);
+}
+
+.allocation-btn.disabled {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
+  opacity: 0.5;
+}
+
+.allocation-btn.increase {
+  background: linear-gradient(45deg, #10b981, #059669);
+}
+
+.allocation-btn.decrease {
+  background: linear-gradient(45deg, #ef4444, #dc2626);
+}
+
+.btn-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.allocation-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fbbf24;
+  min-width: 60rpx;
+  text-align: center;
+}
+
+.attribute-description {
+  font-size: 18rpx;
+  color: #a0a0a0;
+  text-align: center;
+  margin-top: 10rpx;
+  line-height: 1.3;
+}
+
+.allocation-tips {
+  margin-top: 30rpx;
+  padding: 25rpx;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 15rpx;
+  border: 1rpx solid rgba(59, 130, 246, 0.3);
+  text-align: center;
+}
+
+.tips-text {
+  font-size: 20rpx;
+  color: #3b82f6;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.allocation-actions {
+  display: flex;
+  gap: 20rpx;
+  justify-content: center;
+}

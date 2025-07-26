@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "奖励中心",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

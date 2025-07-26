@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "我的故事",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button",
+    "story-book": "/components/story-book/story-book"
+  }
+}

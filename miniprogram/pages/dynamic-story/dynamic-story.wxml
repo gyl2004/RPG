@@ -1,0 +1,159 @@
+<!--动态故事页面-->
+<view class="story-container">
+  <!-- 页面标题 -->
+  <view class="story-header">
+    <text class="story-title">🎭 我的冒险日记</text>
+    <text class="story-subtitle">基于你的真实行为生成的RPG故事</text>
+  </view>
+
+  <!-- 角色状态栏 -->
+  <view class="character-status">
+    <view class="character-info">
+      <text class="character-name">{{character.name}}</text>
+      <text class="character-level">Lv.{{character.level}}</text>
+    </view>
+    <view class="story-stats">
+      <text class="stat-item">📖 故事章节: {{storyHistory.length}}</text>
+      <text class="stat-item">⭐ 今日任务: {{todayActions.completedTasks.length}}</text>
+    </view>
+  </view>
+
+  <!-- 生成故事按钮 -->
+  <view class="action-section" wx:if="{{!currentStory}}">
+    <rpg-button
+      type="primary"
+      text="{{generating ? '正在编织故事...' : '🎭 生成今日冒险故事'}}"
+      size="large"
+      bindtap="generateTodayStory"
+      disabled="{{generating}}"
+      loading="{{generating}}"
+    />
+    <text class="action-hint">基于你今天的任务完成情况和收藏物品生成专属故事</text>
+  </view>
+
+  <!-- 当前故事显示 -->
+  <view class="current-story" wx:if="{{currentStory}}">
+    <view class="story-card">
+      <view class="story-header-info">
+        <text class="story-chapter-title">{{currentStory.title}}</text>
+        <view class="story-meta">
+          <text class="story-mood {{currentStory.mood}}">{{getMoodText(currentStory.mood)}}</text>
+          <text class="story-time">{{formatTime(currentStory.createdAt)}}</text>
+        </view>
+      </view>
+      
+      <view class="story-content">
+        <text class="story-text">{{currentStory.content}}</text>
+      </view>
+
+      <!-- 奖励显示 -->
+      <view class="story-rewards" wx:if="{{currentStory.rewards}}">
+        <text class="rewards-title">🎁 冒险收获</text>
+        <view class="rewards-list">
+          <text class="reward-item" wx:if="{{currentStory.rewards.experience}}">
+            ⭐ 经验值 +{{currentStory.rewards.experience}}
+          </text>
+          <text class="reward-item" wx:for="{{currentStory.rewards.items}}" wx:key="*this">
+            🎒 获得物品: {{item}}
+          </text>
+          <text class="reward-item" wx:for="{{currentStory.rewards.skills}}" wx:key="*this">
+            💪 技能提升: {{item}}
+          </text>
+        </view>
+      </view>
+
+      <!-- 选择分支 -->
+      <view class="story-choices" wx:if="{{currentStory.choices && currentStory.choices.length > 0}}">
+        <text class="choices-title">🔮 你的选择将决定故事的走向</text>
+        <view class="choices-list">
+          <view
+            class="choice-item"
+            wx:for="{{currentStory.choices}}"
+            wx:key="id"
+            data-choice="{{item}}"
+            bindtap="makeChoice"
+          >
+            <view class="choice-content">
+              <text class="choice-text">{{item.text}}</text>
+              <text class="choice-consequence">{{item.consequence}}</text>
+            </view>
+            <view class="choice-arrow">→</view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 下一章提示 -->
+      <view class="next-hints" wx:if="{{currentStory.nextHints}}">
+        <text class="hints-title">🔍 下章预告</text>
+        <text class="hints-text">{{currentStory.nextHints}}</text>
+      </view>
+    </view>
+
+    <!-- 故事操作按钮 -->
+    <view class="story-actions">
+      <rpg-button
+        type="secondary"
+        text="📚 查看故事历史"
+        size="medium"
+        bindtap="showStoryHistory"
+      />
+      <rpg-button
+        type="accent"
+        text="🔄 重新生成故事"
+        size="medium"
+        bindtap="generateTodayStory"
+        disabled="{{generating}}"
+      />
+
+    </view>
+  </view>
+
+  <!-- 故事历史模态框 -->
+  <view class="modal-overlay" wx:if="{{showHistoryModal}}" bindtap="closeHistoryModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">📚 冒险历史</text>
+        <view class="modal-close" bindtap="closeHistoryModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="history-list">
+          <view
+            class="history-item"
+            wx:for="{{storyHistory}}"
+            wx:key="id"
+            data-story="{{item}}"
+            bindtap="selectHistoryStory"
+          >
+            <view class="history-header">
+              <text class="history-title">{{item.title}}</text>
+              <text class="history-date">{{formatDate(item.createdAt)}}</text>
+            </view>
+            <text class="history-preview">{{item.content.substring(0, 100)}}...</text>
+            <view class="history-meta">
+              <text class="history-mood {{item.mood}}">{{getMoodText(item.mood)}}</text>
+              <text class="history-type">{{item.type === 'ai_generated' ? '🤖 AI生成' : '🎲 备选'}}</text>
+            </view>
+          </view>
+        </view>
+        
+        <view class="empty-history" wx:if="{{storyHistory.length === 0}}">
+          <text class="empty-text">还没有冒险故事，快去完成一些任务来开启你的传奇吧！</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据来源显示 -->
+  <view class="data-source">
+    <view class="source-toggle" bindtap="toggleDataSource">
+      <text class="toggle-text">📊 {{showDataSource ? '收起' : '查看'}} 故事数据来源</text>
+    </view>
+    <view class="source-content" wx:if="{{showDataSource}}">
+      <text class="source-item">✅ 今日完成任务: {{todayActions.completedTasks.length}}个</text>
+      <text class="source-item">🔄 今日完成习惯: {{todayActions.completedHabits.length}}个</text>
+      <text class="source-item">🎒 收藏物品: {{collectedItems.length}}个</text>
+      <text class="source-item">⭐ 角色等级: {{character.level}}</text>
+    </view>
+  </view>
+</view>

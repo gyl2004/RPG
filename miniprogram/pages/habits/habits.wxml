@@ -1,0 +1,174 @@
+<!--习惯中心页面-->
+<view class="habits-container">
+  <!-- 页面头部 -->
+  <view class="habits-header">
+    <text class="page-title">习惯养成</text>
+    <view class="header-actions" wx:if="{{habits.length > 0}}">
+      <rpg-button
+        type="primary"
+        text="新建习惯"
+        size="small"
+        bindtap="createHabit"
+      />
+    </view>
+  </view>
+
+  <!-- 统计概览 -->
+  <view class="statistics-section" wx:if="{{statistics.total > 0}}">
+    <text class="section-title">今日概览</text>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <text class="stat-number">{{statistics.active}}</text>
+        <text class="stat-label">进行中</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{statistics.totalCheckIns}}</text>
+        <text class="stat-label">总打卡</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{statistics.averageStreak}}</text>
+        <text class="stat-label">平均连续</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{statistics.total}}</text>
+        <text class="stat-label">总习惯</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 过滤器 -->
+  <view class="filter-section" wx:if="{{habits.length > 0}}">
+    <scroll-view class="filter-scroll" scroll-x="true">
+      <view class="filter-list">
+        <view
+          class="filter-item {{currentFilter === item.id ? 'active' : ''}}"
+          wx:for="{{filters}}"
+          wx:key="id"
+          data-filter="{{item.id}}"
+          bindtap="filterHabits"
+        >
+          <text class="filter-icon">{{item.icon}}</text>
+          <text class="filter-text">{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 习惯列表 -->
+  <view class="habits-list" wx:if="{{habits.length > 0}}">
+    <view
+      class="habit-card"
+      wx:for="{{habits}}"
+      wx:key="id"
+      wx:for-item="habit"
+    >
+      <!-- 习惯头部 -->
+      <view class="habit-header">
+        <view class="habit-info" bindtap="viewHabitDetail" data-habit-id="{{habit.id}}">
+          <view class="habit-title-row">
+            <text class="habit-name">{{habit.name}}</text>
+            <view class="habit-status {{habit.status}}" wx:if="{{statuses && statuses[habit.status]}}">
+              <text class="status-icon">{{statuses[habit.status].icon}}</text>
+            </view>
+          </view>
+          <text class="habit-description" wx:if="{{habit.description}}">{{habit.description}}</text>
+          <view class="habit-meta">
+            <view class="meta-item" wx:if="{{categories && categories[habit.category]}}">
+              <text class="meta-icon">{{categories[habit.category].icon}}</text>
+              <text class="meta-text">{{categories[habit.category].name}}</text>
+            </view>
+            <view class="meta-item">
+              <text class="meta-icon">🔥</text>
+              <text class="meta-text">{{habit.currentStreak}}天连续</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 习惯操作按钮 -->
+        <view class="habit-actions">
+          <view
+            class="action-btn pause-btn"
+            wx:if="{{habit.status === 'active'}}"
+            data-habit-id="{{habit.id}}"
+            data-status="{{habit.status}}"
+            bindtap="toggleHabitStatus"
+          >
+            <text class="action-icon">⏸️</text>
+          </view>
+          <view
+            class="action-btn resume-btn"
+            wx:if="{{habit.status === 'paused'}}"
+            data-habit-id="{{habit.id}}"
+            data-status="{{habit.status}}"
+            bindtap="toggleHabitStatus"
+          >
+            <text class="action-icon">▶️</text>
+          </view>
+          <view
+            class="action-btn delete-btn"
+            data-habit-id="{{habit.id}}"
+            data-habit-name="{{habit.name}}"
+            bindtap="deleteHabit"
+          >
+            <text class="action-icon">🗑️</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 打卡区域 -->
+      <view class="habit-checkin" wx:if="{{habit.status === 'active'}}">
+        <view class="checkin-info">
+          <text class="checkin-date">今日</text>
+          <text class="checkin-status checked" wx:if="{{habit.todayChecked}}">已完成</text>
+          <text class="checkin-status unchecked" wx:else>待完成</text>
+        </view>
+        <view class="checkin-action">
+          <rpg-button
+            wx:if="{{!habit.todayChecked}}"
+            type="accent"
+            text="打卡"
+            size="small"
+            data-habit-id="{{habit.id}}"
+            bindtap="checkInHabit"
+          />
+          <view wx:else class="checked-badge">
+            <text class="checked-icon">✅</text>
+            <text class="checked-text">已打卡</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 进度条 -->
+      <view class="habit-progress" wx:if="{{habit.status === 'active'}}">
+        <view class="progress-info">
+          <text class="progress-label">本周进度</text>
+          <text class="progress-text">{{habit.weeklyProgress || 0}}/7</text>
+        </view>
+        <view class="progress-bar">
+          <view
+            class="progress-fill"
+            style="width: {{Math.min(100, ((habit.weeklyProgress || 0) / 7) * 100)}}%"
+          ></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{habits.length === 0 && !loading}}">
+    <text class="empty-icon">🌱</text>
+    <text class="empty-title">还没有习惯</text>
+    <text class="empty-desc">开始培养第一个好习惯吧！</text>
+    <rpg-button
+      type="primary"
+      text="创建习惯"
+      bindtap="createHabit"
+    />
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

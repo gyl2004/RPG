@@ -1,0 +1,138 @@
+<!--任务页面-->
+<view class="tasks-container">
+  <!-- 任务统计 -->
+  <view class="stats-section">
+    <view class="stats-card">
+      <text class="stats-title">任务概览</text>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-number">{{statistics.total || 0}}</text>
+          <text class="stat-label">总任务</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{statistics.completed || 0}}</text>
+          <text class="stat-label">已完成</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{statistics.inProgress || 0}}</text>
+          <text class="stat-label">进行中</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{statistics.pending || 0}}</text>
+          <text class="stat-label">待开始</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快速操作 -->
+  <view class="quick-actions">
+    <rpg-button
+      type="primary"
+      text="创建新任务"
+      bindtap="goToCreateTask"
+    />
+    <rpg-button
+      type="secondary"
+      text="🤖 AI推荐"
+      bindtap="goToAITasks"
+    />
+  </view>
+
+  <!-- 任务过滤 -->
+  <view class="filter-tabs">
+    <view
+      class="filter-tab {{currentFilter === 'all' ? 'active' : ''}}"
+      data-filter="all"
+      bindtap="switchFilter"
+    >
+      <text class="tab-text">全部</text>
+    </view>
+    <view
+      class="filter-tab {{currentFilter === 'pending' ? 'active' : ''}}"
+      data-filter="pending"
+      bindtap="switchFilter"
+    >
+      <text class="tab-text">待开始</text>
+    </view>
+    <view
+      class="filter-tab {{currentFilter === 'in_progress' ? 'active' : ''}}"
+      data-filter="in_progress"
+      bindtap="switchFilter"
+    >
+      <text class="tab-text">进行中</text>
+    </view>
+    <view
+      class="filter-tab {{currentFilter === 'completed' ? 'active' : ''}}"
+      data-filter="completed"
+      bindtap="switchFilter"
+    >
+      <text class="tab-text">已完成</text>
+    </view>
+  </view>
+
+  <!-- 任务列表 -->
+  <view class="tasks-list">
+    <view
+      class="task-card"
+      wx:for="{{tasks}}"
+      wx:key="id"
+      data-task-id="{{item.id}}"
+      bindtap="viewTaskDetail"
+    >
+      <view class="task-header">
+        <text class="task-title">{{item.title}}</text>
+        <view class="task-status {{item.status}}">
+          <text class="status-text">{{item.status === 'pending' ? '待开始' : item.status === 'in_progress' ? '进行中' : item.status === 'completed' ? '已完成' : '已失败'}}</text>
+        </view>
+      </view>
+
+      <text class="task-description" wx:if="{{item.description}}">{{item.description}}</text>
+
+      <view class="task-meta">
+        <view class="meta-item">
+          <text class="meta-icon">{{categories[item.category] ? categories[item.category].icon : '📋'}}</text>
+          <text class="meta-text">{{categories[item.category] ? categories[item.category].name : item.category}}</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-icon">{{difficulties[item.difficulty] ? difficulties[item.difficulty].icon : '⭐'}}</text>
+          <text class="meta-text">{{difficulties[item.difficulty] ? difficulties[item.difficulty].name : item.difficulty}}</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-icon">⏰</text>
+          <text class="meta-text">{{item.estimatedTime}}分钟</text>
+        </view>
+        <view class="meta-item" wx:if="{{item.deadline}}">
+          <text class="meta-icon">📅</text>
+          <text class="meta-text">{{item.deadline}}</text>
+        </view>
+      </view>
+
+      <view class="task-rewards" wx:if="{{item.rewards}}">
+        <text class="reward-item">⭐ {{item.rewards.experience}}</text>
+        <text class="reward-item">💰 {{item.rewards.coins}}</text>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{tasks.length === 0 && !loading}}">
+      <text class="empty-icon">📝</text>
+      <text class="empty-title">暂无任务</text>
+      <text class="empty-desc">创建你的第一个任务，开始冒险之旅吧！</text>
+      <rpg-button
+        type="primary"
+        text="创建任务"
+        size="small"
+        bindtap="goToCreateTask"
+      />
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-overlay">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,213 @@
+<!--物品收藏记录页面-->
+<view class="collection-container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">🎒 我的收藏</text>
+    <text class="page-subtitle">记录你的珍贵物品，探索它们的魔幻故事</text>
+  </view>
+
+  <!-- 添加物品按钮 -->
+  <view class="add-item-section">
+    <rpg-button
+      type="primary"
+      text="+ 记录新物品"
+      size="medium"
+      bindtap="showAddItemModal"
+    />
+  </view>
+
+  <!-- 物品列表 -->
+  <view class="items-list" wx:if="{{collectedItems.length > 0}}">
+    <view
+      class="item-card"
+      wx:for="{{collectedItems}}"
+      wx:key="id"
+      data-item="{{item}}"
+      bindtap="showItemDetail"
+    >
+      <view class="item-header">
+        <view class="item-icon">{{item.icon || '📦'}}</view>
+        <view class="item-info">
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-category">{{item.category}}</text>
+          <text class="item-date">{{item.purchaseDate}}</text>
+        </view>
+        <view class="item-actions">
+          <view class="ai-status {{item.aiDescription ? 'has-description' : 'no-description'}}">
+            <text class="status-icon">{{item.aiDescription ? '✨' : '🤖'}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="item-description" wx:if="{{item.description}}">
+        <text class="description-text">{{item.description}}</text>
+      </view>
+      
+      <view class="item-ai-preview" wx:if="{{item.aiDescription}}">
+        <text class="ai-label">✨ AI魔幻描述</text>
+        <text class="ai-preview">{{item.aiDescription.substring(0, 50)}}...</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <view class="empty-icon">📦</view>
+    <text class="empty-title">还没有收藏任何物品</text>
+    <text class="empty-subtitle">开始记录你的第一个珍贵物品吧！</text>
+  </view>
+
+  <!-- 添加物品模态框 -->
+  <view class="modal-overlay" wx:if="{{showAddModal}}" bindtap="closeAddModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">记录新物品</text>
+        <view class="modal-close" bindtap="closeAddModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="form-group">
+          <text class="form-label">物品名称</text>
+          <input
+            class="form-input"
+            placeholder="输入物品名称"
+            value="{{newItem.name}}"
+            bindinput="onNameInput"
+          />
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">物品分类</text>
+          <picker
+            class="form-picker"
+            range="{{categories}}"
+            value="{{newItem.categoryIndex}}"
+            bindchange="onCategoryChange"
+          >
+            <view class="picker-display">
+              {{categories[newItem.categoryIndex] || '选择分类'}}
+            </view>
+          </picker>
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">物品图标</text>
+          <view class="icon-selector">
+            <view
+              class="icon-option {{newItem.icon === icon ? 'selected' : ''}}"
+              wx:for="{{iconOptions}}"
+              wx:for-item="icon"
+              wx:key="*this"
+              data-icon="{{icon}}"
+              bindtap="selectIcon"
+            >
+              {{icon}}
+            </view>
+          </view>
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">购买价格</text>
+          <input
+            class="form-input"
+            type="number"
+            placeholder="输入价格（可选）"
+            value="{{newItem.price}}"
+            bindinput="onPriceInput"
+          />
+        </view>
+        
+        <view class="form-group">
+          <text class="form-label">物品描述</text>
+          <textarea
+            class="form-textarea"
+            placeholder="描述这个物品的特点、用途或故事..."
+            value="{{newItem.description}}"
+            bindinput="onDescriptionInput"
+            maxlength="200"
+          />
+          <text class="char-count">{{newItem.description.length}}/200</text>
+        </view>
+      </view>
+      
+      <view class="modal-actions">
+        <rpg-button
+          type="secondary"
+          text="取消"
+          size="small"
+          bindtap="closeAddModal"
+        />
+        <rpg-button
+          type="primary"
+          text="{{saving ? '保存中...' : '保存'}}"
+          size="small"
+          bindtap="saveNewItem"
+          disabled="{{!newItem.name || saving}}"
+          loading="{{saving}}"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 物品详情模态框 -->
+  <view class="modal-overlay" wx:if="{{showDetailModal}}" bindtap="closeDetailModal">
+    <view class="modal-content detail-modal" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">{{selectedItem.name}}</text>
+        <view class="modal-close" bindtap="closeDetailModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="item-detail-header">
+          <view class="detail-icon">{{selectedItem.icon}}</view>
+          <view class="detail-info">
+            <text class="detail-category">{{selectedItem.category}}</text>
+            <text class="detail-date">购买于 {{selectedItem.purchaseDate}}</text>
+            <text class="detail-price" wx:if="{{selectedItem.price}}">💰 {{selectedItem.price}}</text>
+          </view>
+        </view>
+        
+        <view class="item-description-full" wx:if="{{selectedItem.description}}">
+          <text class="description-label">物品描述</text>
+          <text class="description-content">{{selectedItem.description}}</text>
+        </view>
+        
+        <view class="ai-description-section">
+          <view class="ai-header">
+            <text class="ai-title">✨ AI魔幻描述</text>
+            <rpg-button
+              type="accent"
+              text="{{selectedItem.aiDescription ? '重新生成' : '生成描述'}}"
+              size="small"
+              bindtap="generateAIDescription"
+              loading="{{generatingAI}}"
+            />
+          </view>
+          
+          <view class="ai-content" wx:if="{{selectedItem.aiDescription}}">
+            <text class="ai-description">{{selectedItem.aiDescription}}</text>
+          </view>
+          
+          <view class="ai-placeholder" wx:else>
+            <text class="placeholder-text">点击按钮让AI为这个物品创造魔幻的背景故事</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="modal-actions">
+        <rpg-button
+          type="secondary"
+          text="删除物品"
+          size="small"
+          bindtap="deleteItem"
+        />
+        <rpg-button
+          type="primary"
+          text="关闭"
+          size="small"
+          bindtap="closeDetailModal"
+        />
+      </view>
+    </view>
+  </view>
+</view>

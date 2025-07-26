@@ -1,0 +1,106 @@
+<!--现实世界RPG首页-->
+<view class="container">
+  <!-- 用户角色信息 -->
+  <view class="character-info">
+    <view class="character-avatar">
+      <image src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" class="avatar-image"></image>
+      <view class="level-badge">Lv.{{character.level || 1}}</view>
+    </view>
+    <view class="character-details">
+      <text class="character-name">{{userInfo.nickName || currentUser.name || '冒险者'}}</text>
+      <text class="character-class">{{character.class || '新手'}}</text>
+      <view class="friend-code-display" wx:if="{{currentUser.friendCode}}">
+        <text class="friend-code-label">好友代码:</text>
+        <text class="friend-code-value">{{currentUser.friendCode}}</text>
+      </view>
+      <view class="exp-bar">
+        <view class="exp-progress" style="width: {{character.expPercent || 0}}%"></view>
+        <text class="exp-text">{{character.experience || 0}}/{{character.nextLevelExp || 100}} EXP</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 今日任务 -->
+  <view class="today-tasks">
+    <view class="section-title">
+      <text>今日任务</text>
+      <text class="task-count">{{todayTasks.length || 0}}/5</text>
+    </view>
+    <view class="task-list">
+      <view class="task-item" wx:for="{{todayTasks}}" wx:key="id">
+        <view class="task-icon {{item.completed ? 'completed' : ''}}">
+          <text>{{item.completed ? '✓' : '○'}}</text>
+        </view>
+        <view class="task-content">
+          <text class="task-title">{{item.title}}</text>
+          <text class="task-reward">+{{item.experience}}EXP</text>
+        </view>
+      </view>
+      <view class="add-task" bindtap="navigateToTasks">
+        <text>+ 添加新任务</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 习惯打卡 -->
+  <view class="habits-section">
+    <view class="section-title">
+      <text>习惯打卡</text>
+      <text class="habit-streak">连续{{maxStreak || 0}}天</text>
+    </view>
+    <view class="habit-list">
+      <view class="habit-item" wx:for="{{todayHabits}}" wx:key="id">
+        <view class="habit-icon {{item.completed ? 'completed' : ''}}" bindtap="toggleHabit" data-id="{{item.id}}">
+          <text>{{item.completed ? '✓' : '○'}}</text>
+        </view>
+        <text class="habit-name">{{item.name}}</text>
+        <text class="habit-streak">{{item.streak}}天</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快速操作 -->
+  <view class="quick-actions">
+    <view class="action-button" bindtap="navigateToCharacter">
+      <text class="action-icon">👤</text>
+      <text class="action-text">角色</text>
+    </view>
+    <view class="action-button" bindtap="navigateToTasks">
+      <text class="action-icon">📋</text>
+      <text class="action-text">任务</text>
+    </view>
+    <view class="action-button" bindtap="navigateToHabits">
+      <text class="action-icon">🎯</text>
+      <text class="action-text">习惯</text>
+    </view>
+    <view class="action-button" bindtap="navigateToRewards">
+      <text class="action-icon">🏆</text>
+      <text class="action-text">奖励</text>
+    </view>
+    <view class="action-button" bindtap="navigateToSocial">
+      <text class="action-icon">👥</text>
+      <text class="action-text">社交</text>
+    </view>
+    <view class="action-button" bindtap="navigateToStory">
+      <text class="action-icon">📖</text>
+      <text class="action-text">故事</text>
+    </view>
+    <view class="action-button ai-button" bindtap="navigateToAITasks">
+      <text class="action-icon">🤖</text>
+      <text class="action-text">AI推荐</text>
+      <text class="ai-badge">GPT</text>
+    </view>
+    <view class="action-button collection-button" bindtap="navigateToItemCollection">
+      <text class="action-icon">🎒</text>
+      <text class="action-text">我的收藏</text>
+      <text class="collection-badge">NEW</text>
+    </view>
+    <view class="action-button story-button" bindtap="navigateToDynamicStory">
+      <text class="action-icon">🎭</text>
+      <text class="action-text">冒险日记</text>
+      <text class="story-badge">AI</text>
+    </view>
+  </view>
+
+
+</view>

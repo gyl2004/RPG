@@ -1,0 +1,207 @@
+<!--技能树页面-->
+<view class="skills-container">
+  <!-- 技能点信息 -->
+  <view class="skill-points-header">
+    <view class="points-info">
+      <text class="points-icon">⭐</text>
+      <text class="points-text">可用技能点: {{availableSkillPoints}}</text>
+    </view>
+    <view class="header-actions">
+      <rpg-button 
+        type="secondary" 
+        text="查看效果" 
+        size="small"
+        bindtap="viewSkillEffects"
+      />
+      <rpg-button 
+        type="accent" 
+        text="获得技能点" 
+        size="small"
+        bindtap="gainSkillPoints"
+      />
+    </view>
+  </view>
+
+  <!-- 技能树选择 -->
+  <view class="skill-tree-tabs">
+    <scroll-view scroll-x="true" class="tabs-scroll">
+      <view class="tabs-container">
+        <view 
+          class="tree-tab {{currentTree === item ? 'active' : ''}}" 
+          wx:for="{{Object.keys(skillTrees)}}" 
+          wx:key="*this"
+          data-tree="{{item}}"
+          bindtap="switchSkillTree"
+          style="border-color: {{skillTrees[item].color}}"
+        >
+          <text class="tab-icon">{{skillTrees[item].icon}}</text>
+          <text class="tab-name">{{skillTrees[item].name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 当前技能树 -->
+  <view class="current-skill-tree" wx:if="{{skillTrees[currentTree]}}">
+    <view class="tree-header">
+      <text class="tree-title">{{skillTrees[currentTree].name}}</text>
+      <text class="tree-description">{{skillTrees[currentTree].description}}</text>
+    </view>
+
+    <!-- 技能列表 -->
+    <view class="skills-list">
+      <view 
+        class="skill-item {{getSkillStatusClass(skill, currentTree)}}" 
+        wx:for="{{Object.values(skillTrees[currentTree].skills)}}" 
+        wx:key="id"
+        wx:for-item="skill"
+        data-skill="{{skill.id}}"
+        data-tree="{{currentTree}}"
+        bindtap="showSkillDetail"
+      >
+        <!-- 技能图标和等级 -->
+        <view class="skill-icon-container">
+          <text class="skill-icon">{{skill.icon}}</text>
+          <view class="skill-level" wx:if="{{getSkillCurrentLevel(skill.id) > 0}}">
+            <text class="level-text">{{getSkillCurrentLevel(skill.id)}}</text>
+          </view>
+        </view>
+
+        <!-- 技能信息 -->
+        <view class="skill-info">
+          <text class="skill-name">{{skill.name}}</text>
+          <text class="skill-description">{{skill.description}}</text>
+          
+          <!-- 技能进度 -->
+          <view class="skill-progress">
+            <text class="progress-text">
+              {{getSkillCurrentLevel(skill.id)}}/{{skill.maxLevel}}
+            </text>
+            <view class="progress-bar">
+              <view 
+                class="progress-fill" 
+                style="width: {{(getSkillCurrentLevel(skill.id) / skill.maxLevel) * 100}}%; background-color: {{skillTrees[currentTree].color}}"
+              ></view>
+            </view>
+          </view>
+
+          <!-- 技能点消耗 -->
+          <view class="skill-cost">
+            <text class="cost-icon">⭐</text>
+            <text class="cost-text">{{skill.skillPoints}} 技能点</text>
+          </view>
+        </view>
+
+        <!-- 技能状态指示 -->
+        <view class="skill-status">
+          <text class="status-icon" wx:if="{{getSkillCurrentLevel(skill.id) >= skill.maxLevel}}">✅</text>
+          <text class="status-icon" wx:elif="{{getSkillCurrentLevel(skill.id) > 0}}">📈</text>
+          <text class="status-icon" wx:else>🔒</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 技能详情模态框 -->
+  <view class="modal-overlay" wx:if="{{showSkillModal}}" bindtap="closeSkillModal">
+    <view class="skill-modal" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">{{selectedSkill.name}}</text>
+        <text class="modal-icon">{{selectedSkill.icon}}</text>
+      </view>
+
+      <view class="modal-content">
+        <!-- 技能描述 -->
+        <text class="skill-description-full">{{selectedSkill.description}}</text>
+
+        <!-- 当前等级 -->
+        <view class="current-level-info">
+          <text class="level-label">当前等级</text>
+          <text class="level-value">{{selectedSkill.currentLevel}}/{{selectedSkill.maxLevel}}</text>
+        </view>
+
+        <!-- 等级进度条 -->
+        <view class="level-progress-bar">
+          <view 
+            class="level-progress-fill" 
+            style="width: {{(selectedSkill.currentLevel / selectedSkill.maxLevel) * 100}}%; background-color: {{skillTrees[selectedSkill.treeType].color}}"
+          ></view>
+        </view>
+
+        <!-- 技能要求 -->
+        <view class="skill-requirements">
+          <text class="requirements-title">学习要求</text>
+          <view class="requirements-list">
+            <text class="requirement-item">等级: {{selectedSkill.requirements.level}}</text>
+            <text
+              class="requirement-item"
+              wx:for="{{selectedSkill.attributeRequirements}}"
+              wx:key="name"
+            >
+              {{item.name}}: {{item.value}}
+            </text>
+            <text
+              class="requirement-item"
+              wx:for="{{selectedSkill.skillRequirements}}"
+              wx:key="name"
+            >
+              前置技能: {{item.name}} Lv.{{item.level}}
+            </text>
+          </view>
+        </view>
+
+        <!-- 技能效果 -->
+        <view class="skill-effects">
+          <text class="effects-title">技能效果</text>
+          <view class="effects-list">
+            <text
+              class="effect-item"
+              wx:for="{{selectedSkill.effectsList}}"
+              wx:key="name"
+            >
+              {{item.name}}: {{item.value}}
+            </text>
+          </view>
+        </view>
+
+        <!-- 消耗信息 -->
+        <view class="skill-cost-info">
+          <text class="cost-label">消耗技能点</text>
+          <text class="cost-value">{{selectedSkill.skillPoints}}</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="modal-actions">
+        <rpg-button 
+          type="primary" 
+          text="学习技能" 
+          size="small"
+          bindtap="learnSkill"
+          wx:if="{{selectedSkill.canLearn && availableSkillPoints >= selectedSkill.skillPoints}}"
+        />
+        <rpg-button 
+          type="secondary" 
+          text="{{selectedSkill.isMaxLevel ? '已满级' : selectedSkill.requirementReason || '条件不足'}}" 
+          size="small"
+          disabled="true"
+          wx:else
+        />
+        <rpg-button 
+          type="secondary" 
+          text="关闭" 
+          size="small"
+          bindtap="closeSkillModal"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-overlay">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>

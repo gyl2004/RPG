@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "外观定制",
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

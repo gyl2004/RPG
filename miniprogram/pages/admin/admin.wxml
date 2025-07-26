@@ -1,0 +1,297 @@
+<!--数据库管理页面-->
+<view class="admin-container">
+  <!-- 页面标题 -->
+  <view class="admin-header">
+    <text class="admin-title">数据库管理</text>
+    <text class="admin-subtitle">开发工具 - 仅限管理员使用</text>
+  </view>
+
+  <!-- 操作按钮区域 -->
+  <view class="admin-actions">
+    <rpg-button
+      type="primary"
+      text="初始化数据库"
+      loading="{{loading}}"
+      bindtap="initializeDatabase"
+    />
+    <rpg-button
+      type="secondary"
+      text="创建索引"
+      bindtap="createIndexes"
+    />
+    <rpg-button
+      type="warning"
+      text="测试云函数"
+      bindtap="testCloudFunction"
+    />
+    <rpg-button
+      type="danger"
+      text="清空数据库"
+      bindtap="clearDatabase"
+    />
+  </view>
+
+  <!-- 标签页导航 -->
+  <view class="tab-nav">
+    <view
+      class="tab-item {{activeTab === 'status' ? 'active' : ''}}"
+      data-tab="status"
+      bindtap="switchTab"
+    >
+      数据库状态
+    </view>
+    <view
+      class="tab-item {{activeTab === 'indexes' ? 'active' : ''}}"
+      data-tab="indexes"
+      bindtap="switchTab"
+    >
+      索引管理
+    </view>
+    <view
+      class="tab-item {{activeTab === 'security' ? 'active' : ''}}"
+      data-tab="security"
+      bindtap="switchTab"
+    >
+      安全规则
+    </view>
+    <view
+      class="tab-item {{activeTab === 'models' ? 'active' : ''}}"
+      data-tab="models"
+      bindtap="switchTab"
+    >
+      模型接口
+    </view>
+    <view
+      class="tab-item {{activeTab === 'logs' ? 'active' : ''}}"
+      data-tab="logs"
+      bindtap="switchTab"
+    >
+      操作日志
+    </view>
+  </view>
+
+  <!-- 数据库状态标签页 -->
+  <view wx:if="{{activeTab === 'status'}}" class="tab-content">
+    <view class="status-section">
+      <view class="section-header">
+        <text class="section-title">数据库状态</text>
+        <view class="status-actions">
+          <text class="action-btn" bindtap="exportStatus">导出</text>
+          <text class="action-btn" bindtap="refreshStatus">刷新</text>
+        </view>
+      </view>
+
+      <view class="status-grid">
+        <view
+          class="status-item"
+          wx:for="{{dbStatus}}"
+          wx:key="index"
+          data-collection="{{index}}"
+          bindtap="viewCollectionDetails"
+        >
+          <view class="status-name">{{index}}</view>
+          <view class="status-count {{item === 'error' ? 'error' : ''}}">
+            {{item === 'error' ? '错误' : item + ' 条'}}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 索引管理标签页 -->
+  <view wx:if="{{activeTab === 'indexes'}}" class="tab-content">
+    <view class="indexes-section">
+      <view class="section-header">
+        <text class="section-title">索引推荐</text>
+        <view class="status-actions">
+          <text class="action-btn" bindtap="generateIndexScript">生成脚本</text>
+          <text class="action-btn" bindtap="createIndexes">创建索引</text>
+        </view>
+      </view>
+
+      <view class="indexes-grid">
+        <view
+          class="index-item"
+          wx:for="{{indexRecommendations}}"
+          wx:key="index"
+          data-collection="{{index}}"
+          bindtap="viewIndexDetails"
+        >
+          <view class="index-collection">{{index}}</view>
+          <view class="index-count">{{item.length}} 个推荐索引</view>
+          <view class="index-preview">
+            <text
+              class="index-field"
+              wx:for="{{item}}"
+              wx:for-item="indexItem"
+              wx:key="field"
+            >
+              {{indexItem.field}}
+            </text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 安全规则标签页 -->
+  <view wx:if="{{activeTab === 'security'}}" class="tab-content">
+    <view class="security-section">
+      <view class="section-header">
+        <text class="section-title">安全规则</text>
+        <view class="status-actions">
+          <text class="action-btn" bindtap="generateSecurityScript">生成脚本</text>
+          <text class="action-btn" bindtap="validateSecurityRules">验证规则</text>
+        </view>
+      </view>
+
+      <!-- 安全摘要 -->
+      <view class="security-summary">
+        <view class="summary-item">
+          <text class="summary-label">总集合数</text>
+          <text class="summary-value">{{securitySummary.totalCollections}}</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-label">只读集合</text>
+          <text class="summary-value">{{securitySummary.readOnlyCollections}}</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-label">用户数据集合</text>
+          <text class="summary-value">{{securitySummary.userDataCollections}}</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-label">系统数据集合</text>
+          <text class="summary-value">{{securitySummary.systemDataCollections}}</text>
+        </view>
+      </view>
+
+      <!-- 验证结果 -->
+      <view wx:if="{{securitySummary.validation}}" class="validation-result">
+        <view class="validation-status {{securitySummary.validation.valid ? 'valid' : 'invalid'}}">
+          {{securitySummary.validation.valid ? '✓ 验证通过' : '✗ 验证失败'}}
+        </view>
+        <view wx:if="{{securitySummary.validation.errors.length > 0}}" class="validation-errors">
+          <text class="validation-title">错误 ({{securitySummary.validation.errors.length}})</text>
+          <text
+            class="validation-item error"
+            wx:for="{{securitySummary.validation.errors}}"
+            wx:key="*this"
+          >
+            {{item}}
+          </text>
+        </view>
+        <view wx:if="{{securitySummary.validation.warnings.length > 0}}" class="validation-warnings">
+          <text class="validation-title">警告 ({{securitySummary.validation.warnings.length}})</text>
+          <text
+            class="validation-item warning"
+            wx:for="{{securitySummary.validation.warnings}}"
+            wx:key="*this"
+          >
+            {{item}}
+          </text>
+        </view>
+      </view>
+
+      <!-- 集合安全规则列表 -->
+      <view class="security-collections">
+        <text class="collections-title">集合安全规则</text>
+        <view class="collections-grid">
+          <view
+            class="security-item"
+            wx:for="{{dbStatus}}"
+            wx:key="index"
+            data-collection="{{index}}"
+            bindtap="viewSecurityRules"
+          >
+            <view class="security-collection">{{index}}</view>
+            <view class="security-status">
+              <text class="security-icon">🔒</text>
+              <text class="security-text">已配置</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 模型接口标签页 -->
+  <view wx:if="{{activeTab === 'models'}}" class="tab-content">
+    <view class="models-section">
+      <view class="section-header">
+        <text class="section-title">模型接口</text>
+        <view class="status-actions">
+          <text class="action-btn" bindtap="testModelInterface">测试接口</text>
+        </view>
+      </view>
+
+      <!-- 支持的模型类型 -->
+      <view class="models-grid">
+        <view
+          class="model-item"
+          wx:for="{{modelTypes}}"
+          wx:key="*this"
+          data-type="{{item}}"
+          bindtap="createDefaultModel"
+        >
+          <view class="model-type">{{item}}</view>
+          <view class="model-description">
+            {{item === 'user' ? '用户模型' :
+              item === 'character' ? '角色模型' :
+              item === 'task' ? '任务模型' :
+              item === 'habit' ? '习惯模型' :
+              item === 'item' ? '物品模型' :
+              item === 'inventory' ? '库存模型' : '未知模型'}}
+          </view>
+          <view class="model-action">
+            <text class="model-btn">查看默认</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 模型接口说明 -->
+      <view class="models-info">
+        <text class="info-title">模型接口功能</text>
+        <view class="info-list">
+          <text class="info-item">• 数据模型创建和验证</text>
+          <text class="info-item">• 业务规则检查</text>
+          <text class="info-item">• 数据库格式转换</text>
+          <text class="info-item">• 统一的CRUD操作</text>
+          <text class="info-item">• 批量操作支持</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作日志标签页 -->
+  <view wx:if="{{activeTab === 'logs'}}" class="tab-content">
+    <view class="logs-section">
+      <view class="section-header">
+        <text class="section-title">操作日志</text>
+        <text class="action-btn" bindtap="clearLogs">清空</text>
+      </view>
+
+      <view class="logs-container">
+        <view
+          class="log-item log-{{item.type}}"
+          wx:for="{{logs}}"
+          wx:key="id"
+        >
+          <text class="log-time">{{item.timestamp}}</text>
+          <text class="log-message">{{item.message}}</text>
+        </view>
+
+        <view wx:if="{{logs.length === 0}}" class="empty-logs">
+          暂无日志记录
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载遮罩 -->
+  <view wx:if="{{loading}}" class="loading-overlay">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">处理中...</text>
+    </view>
+  </view>
+</view>

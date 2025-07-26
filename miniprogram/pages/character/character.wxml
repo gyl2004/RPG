@@ -1,0 +1,257 @@
+<!--角色页面-->
+<view class="character-container">
+  <!-- 角色头部信息 -->
+  <view class="character-header">
+    <view class="character-info">
+      <view class="character-basic">
+        <text class="character-name">{{character.name || user.nickname}}</text>
+        <text class="character-title">{{characterTitle}}</text>
+        <text class="character-class">{{character.class}}</text>
+        <text class="character-level">Lv.{{character.level || 1}}</text>
+      </view>
+
+      <!-- 经验值条 -->
+      <view class="exp-section">
+        <view class="exp-header">
+          <text class="exp-label">经验值</text>
+          <text class="exp-remaining">还需 {{expToNextLevel}} 经验升级</text>
+        </view>
+        <view class="exp-bar">
+          <view class="exp-progress" style="width: {{expProgress}}%"></view>
+        </view>
+        <text class="exp-text">{{expProgress}}% ({{character.experience || 0}}/{{character.level >= 100 ? 'MAX' : expToNextLevel + (character.experience || 0)}})</text>
+      </view>
+
+      <!-- 等级段和战斗力 -->
+      <view class="stats-row">
+        <view class="level-tier">
+          <text class="tier-icon">{{levelTier.icon}}</text>
+          <text class="tier-name" style="color: {{levelTier.color}}">{{levelTier.name}}段位</text>
+        </view>
+        <view class="power-section">
+          <text class="power-label">战斗力</text>
+          <text class="power-value">{{powerLevel}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 属性点提示 -->
+  <view class="points-notice" wx:if="{{availablePoints > 0}}">
+    <text class="notice-icon">🎯</text>
+    <text class="notice-text">你有 {{availablePoints}} 个属性点可以分配</text>
+  </view>
+
+  <!-- 六大属性 -->
+  <view class="attributes-section">
+    <view class="section-header">
+      <text class="section-title">角色属性</text>
+      <view wx:if="{{availablePoints > 0}}" class="points-display">
+        <text class="points-text">可分配: {{availablePoints}}</text>
+        <rpg-button
+          type="tertiary"
+          text="{{allocatingMode ? '完成分配' : '分配属性'}}"
+          size="small"
+          bindtap="toggleAllocatingMode"
+        />
+      </view>
+    </view>
+
+    <view class="attributes-grid">
+      <view
+        class="attribute-item {{allocatingMode ? 'allocating' : ''}}"
+        wx:for="{{attributesList}}"
+        wx:key="id"
+        data-attribute="{{item.id}}"
+        bindtap="{{allocatingMode ? '' : 'showAttributeDetail'}}"
+      >
+        <view class="attribute-header">
+          <text class="attribute-icon">{{item.icon}}</text>
+          <text class="attribute-name">{{item.name}}</text>
+          <text class="attribute-level">
+            {{item.value >= 80 ? 'S级' :
+              item.value >= 60 ? 'A级' :
+              item.value >= 40 ? 'B级' :
+              item.value >= 20 ? 'C级' : 'D级'}}
+          </text>
+        </view>
+
+        <view class="attribute-value">
+          <text class="value-number">{{item.value}}</text>
+          <view class="value-bar">
+            <view
+              class="value-progress"
+              style="width: {{item.value > 100 ? 100 : item.value}}%; background-color: {{item.color}}"
+            ></view>
+          </view>
+        </view>
+
+        <!-- 分配模式下的操作按钮 -->
+        <view wx:if="{{allocatingMode}}" class="allocation-controls">
+          <view
+            class="allocation-btn decrease {{item.value <= 0 ? 'disabled' : ''}}"
+            data-attribute="{{item.id}}"
+            data-action="decrease"
+            bindtap="adjustAttribute"
+          >
+            <text class="btn-text">-</text>
+          </view>
+          <text class="allocation-value">{{item.value}}</text>
+          <view
+            class="allocation-btn increase {{availablePoints <= 0 || item.value >= 100 ? 'disabled' : ''}}"
+            data-attribute="{{item.id}}"
+            data-action="increase"
+            bindtap="adjustAttribute"
+          >
+            <text class="btn-text">+</text>
+          </view>
+        </view>
+
+        <text class="attribute-description">{{item.description}}</text>
+      </view>
+    </view>
+
+    <!-- 分配模式下的操作提示 -->
+    <view wx:if="{{allocatingMode}}" class="allocation-tips">
+      <text class="tips-text">💡 点击 + 或 - 按钮来分配属性点</text>
+      <view class="allocation-actions">
+        <rpg-button
+          type="secondary"
+          text="重置分配"
+          size="small"
+          bindtap="resetAllocation"
+        />
+        <rpg-button
+          type="primary"
+          text="确认分配"
+          size="small"
+          bindtap="confirmAllocation"
+          disabled="{{availablePoints === originalAvailablePoints}}"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="actions-section">
+    <view class="action-row">
+      <rpg-button
+        type="primary"
+        text="查看详情"
+        bindtap="viewCharacterDetails"
+      />
+      <rpg-button
+        type="secondary"
+        text="外观定制"
+        bindtap="goToAppearance"
+      />
+    </view>
+
+    <view class="action-row" wx:if="{{availablePoints === 0 && character.level > 1}}">
+      <rpg-button
+        type="warning"
+        text="重置属性"
+        bindtap="resetAttributes"
+      />
+    </view>
+
+    <view class="test-actions">
+      <text class="test-label">测试功能</text>
+      <view class="test-buttons">
+        <rpg-button
+          type="accent"
+          text="获得经验"
+          size="small"
+          bindtap="testGainExp"
+        />
+        <rpg-button
+          type="accent"
+          text="完成任务"
+          size="small"
+          bindtap="simulateTaskComplete"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 属性详情模态框 -->
+  <view class="modal-overlay" wx:if="{{showAttributeModal}}" bindtap="closeAttributeModal">
+    <view class="attribute-modal" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">{{selectedAttribute.name}}</text>
+        <text class="modal-icon">{{selectedAttribute.icon}}</text>
+      </view>
+
+      <view class="modal-content">
+        <text class="attribute-description">{{selectedAttribute.description}}</text>
+
+        <view class="current-value">
+          <text class="value-label">当前数值</text>
+          <text class="value-number">{{selectedAttribute.value}}/100</text>
+        </view>
+
+        <view class="value-bar-large">
+          <view
+            class="value-progress-large"
+            style="width: {{selectedAttribute.value}}%; background-color: {{selectedAttribute.color}}"
+          ></view>
+        </view>
+
+        <view class="attribute-effects">
+          <text class="effects-title">属性效果</text>
+          <text class="effects-text">
+            {{selectedAttribute.value >= 80 ? '大师级：显著提升相关任务奖励' :
+              selectedAttribute.value >= 60 ? '专家级：明显提升相关任务奖励' :
+              selectedAttribute.value >= 40 ? '熟练级：适度提升相关任务奖励' :
+              selectedAttribute.value >= 20 ? '入门级：轻微提升相关任务奖励' : '新手级：基础效果'}}
+          </text>
+        </view>
+      </view>
+
+      <view class="modal-actions" wx:if="{{availablePoints > 0}}">
+        <rpg-button
+          type="primary"
+          text="分配 1 点"
+          size="small"
+          data-attribute="{{selectedAttribute.id}}"
+          data-points="1"
+          bindtap="allocateAttribute"
+        />
+        <rpg-button
+          type="secondary"
+          text="分配 5 点"
+          size="small"
+          data-attribute="{{selectedAttribute.id}}"
+          data-points="5"
+          bindtap="allocateAttribute"
+          wx:if="{{availablePoints >= 5}}"
+        />
+      </view>
+
+      <view class="modal-close">
+        <rpg-button
+          type="secondary"
+          text="关闭"
+          size="small"
+          bindtap="closeAttributeModal"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 升级动画模态框 -->
+  <level-up-modal
+    show="{{showLevelUpModal}}"
+    levelUpData="{{levelUpData}}"
+    bindclose="closeLevelUpModal"
+    bindshare="shareLevelUp"
+  />
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-overlay">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>

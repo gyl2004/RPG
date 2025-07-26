@@ -1,0 +1,501 @@
+<!--故事线和个性化页面-->
+<view class="story-container">
+  <!-- 页面头部 -->
+  <view class="story-header">
+    <text class="page-title">我的故事</text>
+    <view class="progress-display">
+      <text class="progress-text">进度：{{storyProgress.totalProgress || 0}}%</text>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{storyProgress.totalProgress || 0}}%"></view>
+      </view>
+    </view>
+    <view class="service-status" wx:if="{{!loading}}">
+      <text class="status-text">🟢 服务正常</text>
+    </view>
+  </view>
+
+  <!-- 每日个性化内容 -->
+  <view class="daily-content" wx:if="{{dailyContent.greeting}}">
+    <view class="daily-card">
+      <text class="daily-greeting">{{dailyContent.greeting}}</text>
+      <text class="daily-motivation">{{dailyContent.motivation}}</text>
+      <text class="story-update" wx:if="{{dailyContent.storyUpdate}}">{{dailyContent.storyUpdate}}</text>
+    </view>
+  </view>
+
+  <!-- 标签页导航 -->
+  <view class="tab-navigation">
+    <scroll-view class="tab-scroll" scroll-x="true">
+      <view class="tab-list">
+        <view 
+          class="tab-item {{currentTab === item.id ? 'active' : ''}}"
+          wx:for="{{tabs}}"
+          wx:key="id"
+          data-tab="{{item.id}}"
+          bindtap="switchTab"
+        >
+          <text class="tab-icon">{{item.icon}}</text>
+          <text class="tab-text">{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 故事线页面 -->
+  <view class="tab-content" wx:if="{{currentTab === 'story'}}">
+    <view class="story-section">
+      <view class="section-header">
+        <text class="section-title">故事章节</text>
+        <view class="header-buttons">
+          <!-- 显示模式切换 -->
+          <view class="mode-switcher">
+            <view
+              class="mode-btn {{storyDisplayMode === 'timeline' ? 'active' : ''}}"
+              data-mode="timeline"
+              bindtap="switchStoryMode"
+            >
+              <text class="mode-icon">📋</text>
+            </view>
+            <view
+              class="mode-btn {{storyDisplayMode === 'book' ? 'active' : ''}}"
+              data-mode="book"
+              bindtap="switchStoryMode"
+            >
+              <text class="mode-icon">📖</text>
+            </view>
+            <view
+              class="mode-btn {{storyDisplayMode === 'card' ? 'active' : ''}}"
+              data-mode="card"
+              bindtap="switchStoryMode"
+            >
+              <text class="mode-icon">🃏</text>
+            </view>
+          </view>
+
+          <rpg-button
+            type="secondary"
+            text="刷新数据"
+            size="small"
+            bindtap="loadStoryData"
+          />
+          <rpg-button
+            wx:if="{{canGenerateNewChapter()}}"
+            type="primary"
+            text="生成新章节"
+            size="small"
+            bindtap="showGenerateModal"
+          />
+        </view>
+      </view>
+
+      <!-- 故事书组件 -->
+      <story-book
+        chapters="{{chaptersList}}"
+        progress="{{storyProgress}}"
+        mode="{{storyDisplayMode}}"
+        show-progress="{{true}}"
+        bind:chapterselect="onStoryBookChapterSelect"
+      />
+    </view>
+  </view>
+
+  <!-- 个性化页面 -->
+  <view class="tab-content" wx:if="{{currentTab === 'profile'}}">
+    <view class="profile-section">
+      <text class="section-title">个性化设置</text>
+      
+      <!-- 角色类型选择 -->
+      <view class="setting-group">
+        <view class="setting-header">
+          <text class="setting-title">选择你的角色类型</text>
+          <text class="setting-subtitle">不同角色类型会影响推荐内容</text>
+        </view>
+        <view class="character-types">
+          <view 
+            class="character-card {{userProfile.characterType === type.id ? 'selected' : ''}}"
+            wx:for="{{characterTypes}}"
+            wx:key="id"
+            wx:for-item="type"
+            data-type="{{type.id}}"
+            bindtap="updateCharacterType"
+          >
+            <text class="character-icon">{{type.icon}}</text>
+            <text class="character-name">{{type.name}}</text>
+            <text class="character-description">{{type.description}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 活跃时间偏好 -->
+      <view class="setting-group">
+        <view class="setting-header">
+          <text class="setting-title">你的活跃时间</text>
+          <text class="setting-subtitle">帮助我们为你推荐合适的任务时间</text>
+        </view>
+        <view class="time-preferences">
+          <view 
+            class="time-option {{userProfile.preferences.activeTime === 'morning' ? 'selected' : ''}}"
+            data-time="morning"
+            bindtap="updateActiveTime"
+          >
+            <text class="time-icon">🌅</text>
+            <text class="time-label">早晨型</text>
+          </view>
+          <view 
+            class="time-option {{userProfile.preferences.activeTime === 'afternoon' ? 'selected' : ''}}"
+            data-time="afternoon"
+            bindtap="updateActiveTime"
+          >
+            <text class="time-icon">☀️</text>
+            <text class="time-label">下午型</text>
+          </view>
+          <view 
+            class="time-option {{userProfile.preferences.activeTime === 'night' ? 'selected' : ''}}"
+            data-time="night"
+            bindtap="updateActiveTime"
+          >
+            <text class="time-icon">🌙</text>
+            <text class="time-label">夜晚型</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 当前设置概览 -->
+      <view class="current-profile">
+        <text class="profile-title">当前设置</text>
+        <view class="profile-info">
+          <view class="info-item">
+            <text class="info-label">角色类型：</text>
+            <text class="info-value">{{characterTypes[userProfile.characterType].name}}</text>
+          </view>
+          <view class="info-item">
+            <text class="info-label">活跃时间：</text>
+            <text class="info-value">
+              {{userProfile.preferences.activeTime === 'morning' ? '早晨型' : 
+                userProfile.preferences.activeTime === 'afternoon' ? '下午型' : '夜晚型'}}
+            </text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+
+
+
+
+
+  <!-- 章节详情模态框 -->
+  <view class="modal-overlay" wx:if="{{showChapterModal}}" bindtap="hideChapterModal">
+    <view class="chapter-modal" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">{{selectedChapter.title}}</text>
+        <view class="modal-close" bindtap="hideChapterModal">
+          <text class="close-icon">✕</text>
+        </view>
+      </view>
+      <view class="modal-content">
+        <view class="chapter-story">
+          <text class="story-content">{{selectedChapter.content}}</text>
+        </view>
+        <view class="chapter-info" wx:if="{{selectedChapter.rewards}}">
+          <text class="info-title">章节奖励</text>
+          <view class="rewards-display">
+            <text class="reward-item" wx:if="{{selectedChapter.rewards.coins}}">
+              💰 {{selectedChapter.rewards.coins}} 金币
+            </text>
+            <text class="reward-item" wx:if="{{selectedChapter.rewards.experience}}">
+              ⭐ {{selectedChapter.rewards.experience}} 经验
+            </text>
+          </view>
+        </view>
+      </view>
+      <view class="modal-actions" wx:if="{{getChapterStatus(selectedChapter) === 'unlocked'}}">
+        <rpg-button 
+          type="primary" 
+          text="完成章节" 
+          bindtap="completeChapter"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 活动页面 -->
+  <view class="tab-content" wx:if="{{currentTab === 'events'}}">
+    <view class="events-section">
+      <text class="section-title">季节性活动与随机事件</text>
+
+      <!-- 当前季节 -->
+      <view class="season-info" wx:if="{{seasonalEvents.currentSeason}}">
+        <view class="season-header">
+          <text class="season-title">当前季节：{{seasonalEvents.currentSeason === 'spring' ? '春季🌸' : seasonalEvents.currentSeason === 'summer' ? '夏季☀️' : seasonalEvents.currentSeason === 'autumn' ? '秋季🍂' : '冬季❄️'}}</text>
+        </view>
+      </view>
+
+      <!-- 活跃的季节性活动 -->
+      <view class="active-events" wx:if="{{seasonalEvents.activeEvents && seasonalEvents.activeEvents.length > 0}}">
+        <text class="subsection-title">进行中的季节活动</text>
+        <view class="events-list">
+          <view
+            class="event-card seasonal-event"
+            wx:for="{{seasonalEvents.activeEvents}}"
+            wx:key="id"
+            wx:for-item="event"
+          >
+            <view class="event-header">
+              <text class="event-icon">{{event.icon}}</text>
+              <view class="event-info">
+                <text class="event-name">{{event.name}}</text>
+                <text class="event-description">{{event.description}}</text>
+              </view>
+            </view>
+            <view class="event-details">
+              <text class="event-bonus">奖励加成：{{event.bonusValue}}x</text>
+              <text class="event-remaining">剩余：{{event.remainingDays}}天</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 即将到来的活动 -->
+      <view class="upcoming-events" wx:if="{{seasonalEvents.upcomingEvents && seasonalEvents.upcomingEvents.length > 0}}">
+        <text class="subsection-title">即将到来的活动</text>
+        <view class="events-list">
+          <view
+            class="event-card upcoming-event"
+            wx:for="{{seasonalEvents.upcomingEvents}}"
+            wx:key="id"
+            wx:for-item="event"
+            data-event-id="{{event.id}}"
+            bindtap="activateSeasonalEvent"
+          >
+            <view class="event-header">
+              <text class="event-icon">{{event.icon}}</text>
+              <view class="event-info">
+                <text class="event-name">{{event.name}}</text>
+                <text class="event-description">{{event.description}}</text>
+              </view>
+            </view>
+            <view class="event-actions">
+              <text class="activate-hint">点击激活</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 随机事件 -->
+      <view class="random-events" wx:if="{{randomEvents.length > 0}}">
+        <text class="subsection-title">随机事件</text>
+        <view class="events-list">
+          <view
+            class="event-card random-event {{event.rarity}}"
+            wx:for="{{randomEvents}}"
+            wx:key="id"
+            wx:for-item="event"
+            data-event-id="{{event.id}}"
+            bindtap="completeRandomEvent"
+          >
+            <view class="event-header">
+              <text class="event-icon">{{event.icon}}</text>
+              <view class="event-info">
+                <text class="event-name">{{event.name}}</text>
+                <text class="event-description">{{event.description}}</text>
+                <text wx:if="{{event.personalizedReason}}" class="event-reason">💡 {{event.personalizedReason}}</text>
+              </view>
+              <view class="event-badges">
+                <view wx:if="{{event.isAIGenerated}}" class="ai-badge">
+                  <text class="ai-badge-text">AI</text>
+                </view>
+                <view class="rarity-badge {{event.rarity}}">
+                  <text class="rarity-text">{{event.rarity === 'common' ? '普通' : event.rarity === 'uncommon' ? '稀有' : event.rarity === 'rare' ? '稀有' : '传说'}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="event-rewards" wx:if="{{event.effects}}">
+              <text class="rewards-label">奖励：</text>
+              <text class="reward-item" wx:if="{{event.effects.coins}}">{{event.effects.coins}}金币</text>
+              <text class="reward-item" wx:if="{{event.effects.experience}}">{{event.effects.experience}}经验</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 生成随机事件按钮 -->
+      <view class="generate-event-section">
+        <view class="event-buttons">
+          <rpg-button
+            type="primary"
+            text="🤖 AI智能事件"
+            size="small"
+            bindtap="generateAIRandomEvent"
+          />
+          <rpg-button
+            type="secondary"
+            text="🎲 传统随机事件"
+            size="small"
+            bindtap="generateRandomEvent"
+          />
+        </view>
+        <text class="generate-hint">每天有机会遇到意外的惊喜！AI会根据你的状态生成个性化事件。</text>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="empty-events" wx:if="{{(!seasonalEvents.activeEvents || seasonalEvents.activeEvents.length === 0) && randomEvents.length === 0}}">
+        <text class="empty-icon">🎉</text>
+        <text class="empty-text">暂无活动事件</text>
+        <text class="empty-hint">继续你的成长之旅，更多精彩活动等待你发现！</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 成长页面 -->
+  <view class="tab-content" wx:if="{{currentTab === 'growth'}}">
+    <view class="growth-section">
+      <text class="section-title">角色成长追踪</text>
+
+      <!-- 情感状态 -->
+      <view class="emotional-state" wx:if="{{emotionalState.metrics}}">
+        <text class="subsection-title">当前情感状态</text>
+        <view class="emotion-primary">
+          <text class="emotion-label">主要情感：</text>
+          <text class="emotion-value">{{emotionalState.primaryEmotion === 'joyful' ? '😊 快乐' : emotionalState.primaryEmotion === 'energetic' ? '⚡ 充满活力' : emotionalState.primaryEmotion === 'confident' ? '💪 自信' : emotionalState.primaryEmotion === 'stressed' ? '😰 有压力' : emotionalState.primaryEmotion === 'sad' ? '😢 低落' : emotionalState.primaryEmotion === 'unmotivated' ? '😴 缺乏动力' : '😌 平衡'}}</text>
+        </view>
+        <view class="emotion-metrics">
+          <view class="metric-item">
+            <text class="metric-label">幸福度</text>
+            <view class="metric-bar">
+              <view class="metric-fill" style="width: {{emotionalState.metrics.happiness}}%; background-color: {{getEmotionColor(emotionalState.metrics.happiness)}}"></view>
+            </view>
+            <text class="metric-value">{{formatEmotionValue(emotionalState.metrics.happiness)}}</text>
+          </view>
+          <view class="metric-item">
+            <text class="metric-label">动力值</text>
+            <view class="metric-bar">
+              <view class="metric-fill" style="width: {{emotionalState.metrics.motivation}}%; background-color: {{getEmotionColor(emotionalState.metrics.motivation)}}"></view>
+            </view>
+            <text class="metric-value">{{formatEmotionValue(emotionalState.metrics.motivation)}}</text>
+          </view>
+          <view class="metric-item">
+            <text class="metric-label">自信度</text>
+            <view class="metric-bar">
+              <view class="metric-fill" style="width: {{emotionalState.metrics.confidence}}%; background-color: {{getEmotionColor(emotionalState.metrics.confidence)}}"></view>
+            </view>
+            <text class="metric-value">{{formatEmotionValue(emotionalState.metrics.confidence)}}</text>
+          </view>
+        </view>
+        <view class="emotion-advice" wx:if="{{emotionalState.advice}}">
+          <text class="advice-title">💡 情感建议</text>
+          <text class="advice-content">{{emotionalState.advice}}</text>
+        </view>
+      </view>
+
+      <!-- 角色成长指标 -->
+      <view class="character-growth" wx:if="{{characterGrowth.growthMetrics}}">
+        <text class="subsection-title">角色成长指标</text>
+        <view class="growth-overview">
+          <text class="growth-progress">总体进度：{{characterGrowth.overallProgress}}%</text>
+          <text class="next-milestone">下一里程碑：{{characterGrowth.nextMilestone.name}}</text>
+        </view>
+        <view class="growth-metrics">
+          <view class="growth-item">
+            <text class="growth-label">💪 力量</text>
+            <view class="growth-bar">
+              <view class="growth-fill" style="width: {{characterGrowth.growthMetrics.strength}}%"></view>
+            </view>
+            <text class="growth-value">{{characterGrowth.growthMetrics.strength}}</text>
+          </view>
+          <view class="growth-item">
+            <text class="growth-label">🧠 智慧</text>
+            <view class="growth-bar">
+              <view class="growth-fill" style="width: {{characterGrowth.growthMetrics.wisdom}}%"></view>
+            </view>
+            <text class="growth-value">{{characterGrowth.growthMetrics.wisdom}}</text>
+          </view>
+          <view class="growth-item">
+            <text class="growth-label">🎨 创造力</text>
+            <view class="growth-bar">
+              <view class="growth-fill" style="width: {{characterGrowth.growthMetrics.creativity}}%"></view>
+            </view>
+            <text class="growth-value">{{characterGrowth.growthMetrics.creativity}}</text>
+          </view>
+          <view class="growth-item">
+            <text class="growth-label">👥 社交</text>
+            <view class="growth-bar">
+              <view class="growth-fill" style="width: {{characterGrowth.growthMetrics.social}}%"></view>
+            </view>
+            <text class="growth-value">{{characterGrowth.growthMetrics.social}}</text>
+          </view>
+          <view class="growth-item">
+            <text class="growth-label">🎯 自律</text>
+            <view class="growth-bar">
+              <view class="growth-fill" style="width: {{characterGrowth.growthMetrics.discipline}}%"></view>
+            </view>
+            <text class="growth-value">{{characterGrowth.growthMetrics.discipline}}</text>
+          </view>
+        </view>
+        <view class="growth-advice" wx:if="{{characterGrowth.growthAdvice}}">
+          <text class="advice-title">🌟 成长建议</text>
+          <view class="advice-list">
+            <text
+              class="advice-item"
+              wx:for="{{characterGrowth.growthAdvice}}"
+              wx:key="*this"
+            >• {{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 生成章节模态框 -->
+  <view class="modal-overlay" wx:if="{{showGenerateModal}}" bindtap="hideGenerateModal">
+    <view class="generate-modal" catchtap="stopPropagation">
+      <view class="modal-header">
+        <text class="modal-title">生成个性化章节</text>
+        <view class="modal-close" bindtap="hideGenerateModal">
+          <text class="close-icon">✕</text>
+        </view>
+      </view>
+      <view class="modal-content">
+        <view class="generate-info">
+          <text class="info-title">✨ 个性化故事生成</text>
+          <text class="info-description">
+            系统将根据你的成长历程、角色类型和个人成就，为你量身定制一个独特的故事章节。
+          </text>
+          <view class="info-features">
+            <view class="feature-item">
+              <text class="feature-icon">📖</text>
+              <text class="feature-text">基于你的真实成就创作</text>
+            </view>
+            <view class="feature-item">
+              <text class="feature-icon">🎭</text>
+              <text class="feature-text">符合你的角色类型特点</text>
+            </view>
+            <view class="feature-item">
+              <text class="feature-icon">🏆</text>
+              <text class="feature-text">包含专属奖励和认可</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="modal-actions">
+        <rpg-button
+          type="secondary"
+          text="取消"
+          bindtap="hideGenerateModal"
+        />
+        <rpg-button
+          type="primary"
+          text="生成章节"
+          bindtap="generateNewChapter"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-state" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

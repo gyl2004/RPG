@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "AI智能推荐",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#1a1a2e",
+  "backgroundTextStyle": "light",
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

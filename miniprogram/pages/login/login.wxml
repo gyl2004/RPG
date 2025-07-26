@@ -1,0 +1,143 @@
+<!--登录页面-->
+<view class="login-container">
+  <!-- 欢迎界面 -->
+  <view wx:if="{{loginStep === 'welcome'}}" class="welcome-screen">
+    <!-- 应用Logo和标题 -->
+    <view class="app-header">
+      <view class="app-logo">
+        <text class="logo-icon">⚔️</text>
+      </view>
+      <text class="app-title">{{appInfo.name}}</text>
+      <text class="app-subtitle">{{appInfo.description}}</text>
+      <text class="app-version">v{{appInfo.version}}</text>
+    </view>
+
+    <!-- 功能介绍 -->
+    <view class="features">
+      <view class="feature-item">
+        <text class="feature-icon">🎯</text>
+        <text class="feature-text">完成任务获得经验</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🔥</text>
+        <text class="feature-text">培养习惯提升属性</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🏆</text>
+        <text class="feature-text">解锁成就收集奖励</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">👥</text>
+        <text class="feature-text">与好友一起冒险</text>
+      </view>
+    </view>
+
+    <!-- 登录按钮 -->
+    <view class="login-actions">
+      <!-- 头像昵称填写 -->
+      <view class="user-info-form">
+        <view class="avatar-section">
+          <button
+            class="avatar-button"
+            open-type="chooseAvatar"
+            bind:chooseavatar="onChooseAvatar"
+          >
+            <image
+              class="avatar-image"
+              src="{{userInfo.avatarUrl}}"
+              mode="aspectFill"
+              wx:if="{{userInfo.avatarUrl}}"
+            />
+            <view class="default-avatar" wx:else>
+              <text class="avatar-icon">👤</text>
+            </view>
+            <view class="avatar-tip">点击选择头像</view>
+          </button>
+        </view>
+
+        <view class="nickname-section">
+          <input
+            class="nickname-input"
+            type="nickname"
+            placeholder="请输入昵称"
+            value="{{userInfo.nickName}}"
+            bind:input="onNicknameInput"
+            maxlength="20"
+          />
+        </view>
+      </view>
+
+      <rpg-button
+        type="primary"
+        text="开始冒险"
+        loading="{{loading}}"
+        bindtap="startWxLogin"
+      />
+
+      <view class="secondary-actions">
+        <text class="action-link" bindtap="viewAppIntro">了解更多</text>
+        <text class="action-link" bindtap="guestMode">游客模式</text>
+      </view>
+    </view>
+
+    <!-- 协议链接 -->
+    <view class="agreements">
+      <text class="agreement-text">登录即表示同意</text>
+      <text class="agreement-link" bindtap="viewUserAgreement">《用户协议》</text>
+      <text class="agreement-text">和</text>
+      <text class="agreement-link" bindtap="viewPrivacyPolicy">《隐私政策》</text>
+    </view>
+  </view>
+
+  <!-- 授权中界面 -->
+  <view wx:if="{{loginStep === 'authorizing'}}" class="authorizing-screen">
+    <view class="auth-content">
+      <view class="auth-animation">
+        <view class="loading-ring"></view>
+        <text class="auth-icon">🔐</text>
+      </view>
+      <text class="auth-title">正在登录</text>
+      <text class="auth-subtitle">请稍候，正在验证您的身份...</text>
+      
+      <view class="auth-steps">
+        <view class="step-item active">
+          <text class="step-icon">✓</text>
+          <text class="step-text">获取登录凭证</text>
+        </view>
+        <view class="step-item active">
+          <text class="step-icon">✓</text>
+          <text class="step-text">验证用户身份</text>
+        </view>
+        <view class="step-item">
+          <text class="step-icon">○</text>
+          <text class="step-text">初始化用户数据</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 登录成功界面 -->
+  <view wx:if="{{loginStep === 'success'}}" class="success-screen">
+    <view class="success-content">
+      <view class="success-animation">
+        <text class="success-icon">🎉</text>
+      </view>
+      <text class="success-title">登录成功</text>
+      <text class="success-subtitle">欢迎回来，{{userInfo.nickname || '冒险者'}}！</text>
+      
+      <view class="welcome-message">
+        <text class="welcome-text">你的冒险即将开始</text>
+        <text class="welcome-text">准备好迎接挑战了吗？</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 背景装饰 -->
+  <view class="bg-decoration">
+    <view class="bg-particle" style="top: 10%; left: 20%; animation-delay: 0s;"></view>
+    <view class="bg-particle" style="top: 30%; left: 80%; animation-delay: 1s;"></view>
+    <view class="bg-particle" style="top: 60%; left: 10%; animation-delay: 2s;"></view>
+    <view class="bg-particle" style="top: 80%; left: 70%; animation-delay: 3s;"></view>
+    <view class="bg-particle" style="top: 20%; left: 50%; animation-delay: 4s;"></view>
+  </view>
+</view>

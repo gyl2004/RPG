@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "我的冒险日记",
+  "navigationBarBackgroundColor": "#16213e",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#1a1a2e",
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

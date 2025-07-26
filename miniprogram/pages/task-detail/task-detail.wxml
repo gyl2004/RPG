@@ -1,0 +1,369 @@
+<!--任务详情页面-->
+
+<!-- 添加记录模态框 -->
+<view class="modal-overlay" wx:if="{{showRecordModal}}" bindtap="closeRecordModal">
+  <view class="record-modal" catchtap="">
+    <view class="modal-header">
+      <text class="modal-title">添加记录</text>
+      <text class="modal-close" bindtap="closeRecordModal">✕</text>
+    </view>
+
+    <view class="record-types">
+      <view
+        class="record-type-item"
+        data-type="photo"
+        bindtap="selectRecordType"
+      >
+        <text class="type-icon">📷</text>
+        <view class="type-info">
+          <text class="type-name">拍照记录</text>
+          <text class="type-desc">记录当前进展的照片</text>
+        </view>
+        <text class="type-arrow">›</text>
+      </view>
+
+      <view
+        class="record-type-item"
+        data-type="note"
+        bindtap="selectRecordType"
+      >
+        <text class="type-icon">📝</text>
+        <view class="type-info">
+          <text class="type-name">文字记录</text>
+          <text class="type-desc">写下当前的感想和进展</text>
+        </view>
+        <text class="type-arrow">›</text>
+      </view>
+
+      <view
+        class="record-type-item"
+        data-type="progress"
+        bindtap="selectRecordType"
+      >
+        <text class="type-icon">📈</text>
+        <view class="type-info">
+          <text class="type-name">进度节点</text>
+          <text class="type-desc">记录当前进度里程碑</text>
+        </view>
+        <text class="type-arrow">›</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="task-detail-container" wx:if="{{task}}">
+  <!-- 任务头部信息 -->
+  <view class="task-header">
+    <view class="task-title-section">
+      <text class="task-title">{{task.title}}</text>
+      <view class="task-status {{task.status}}">
+        <text class="status-icon">{{taskStatuses[task.status].icon}}</text>
+        <text class="status-text">{{taskStatuses[task.status].name}}</text>
+      </view>
+    </view>
+    
+    <text class="task-description" wx:if="{{task.description}}">{{task.description}}</text>
+  </view>
+
+  <!-- 任务信息卡片 -->
+  <view class="task-info-card">
+    <view class="info-row">
+      <view class="info-item">
+        <text class="info-icon">{{categories[task.category].icon}}</text>
+        <view class="info-content">
+          <text class="info-label">分类</text>
+          <text class="info-value">{{categories[task.category].name}}</text>
+        </view>
+      </view>
+      
+      <view class="info-item">
+        <text class="info-icon">{{difficulties[task.difficulty].icon}}</text>
+        <view class="info-content">
+          <text class="info-label">难度</text>
+          <text class="info-value">{{difficulties[task.difficulty].name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="info-row">
+      <view class="info-item">
+        <text class="info-icon">⏰</text>
+        <view class="info-content">
+          <text class="info-label">预估时间</text>
+          <text class="info-value">{{task.estimatedTime}}分钟</text>
+        </view>
+      </view>
+      
+      <view class="info-item" wx:if="{{verificationTypes && verificationTypes[task.verification]}}">
+        <text class="info-icon">{{verificationTypes[task.verification].icon}}</text>
+        <view class="info-content">
+          <text class="info-label">记录方式</text>
+          <text class="info-value">{{verificationTypes[task.verification].name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="info-row" wx:if="{{task.deadline}}">
+      <view class="info-item full-width">
+        <text class="info-icon">📅</text>
+        <view class="info-content">
+          <text class="info-label">截止日期</text>
+          <text class="info-value">{{task.deadline}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 任务进度 -->
+  <view class="progress-section" wx:if="{{task.status === 'in_progress'}}">
+    <view class="progress-header">
+      <text class="section-title">任务进度</text>
+      <rpg-button
+        type="accent"
+        text="添加记录"
+        size="small"
+        bindtap="showAddRecordModal"
+      />
+    </view>
+
+    <view class="progress-container">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progress}}%"></view>
+      </view>
+      <text class="progress-text">{{progress}}%</text>
+    </view>
+
+    <view class="progress-controls">
+      <slider
+        class="progress-slider"
+        min="0"
+        max="100"
+        step="5"
+        value="{{progress}}"
+        bindchange="onProgressChange"
+        activeColor="#3b82f6"
+        backgroundColor="rgba(255,255,255,0.2)"
+      />
+      <rpg-button
+        type="secondary"
+        text="保存进度"
+        size="small"
+        bindtap="saveProgress"
+      />
+    </view>
+  </view>
+
+  <!-- 任务奖励 -->
+  <view class="rewards-section" wx:if="{{task.rewards}}">
+    <text class="section-title">完成奖励</text>
+    <view class="rewards-grid">
+      <view class="reward-item">
+        <text class="reward-icon">⭐</text>
+        <text class="reward-text">{{task.rewards.experience}} 经验值</text>
+      </view>
+      <view class="reward-item">
+        <text class="reward-icon">💰</text>
+        <text class="reward-text">{{task.rewards.coins}} 金币</text>
+      </view>
+      <view class="reward-item" wx:if="{{task.rewards.attributeBonus}}">
+        <text class="reward-icon">📈</text>
+        <text class="reward-text">属性加成</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 阶段性记录时间轴 -->
+  <view class="timeline-section" wx:if="{{task.progressRecords && task.progressRecords.length > 0}}">
+    <text class="section-title">进展记录</text>
+
+    <view class="timeline-container">
+      <view
+        class="timeline-item"
+        wx:for="{{task.progressRecords}}"
+        wx:key="id"
+        wx:for-item="record"
+      >
+        <!-- 时间轴线条和节点 -->
+        <view class="timeline-line">
+          <view class="timeline-dot {{record.type}}"></view>
+          <view class="timeline-connector" wx:if="{{index < task.progressRecords.length - 1}}"></view>
+        </view>
+
+        <!-- 记录内容 -->
+        <view class="timeline-content">
+          <view class="record-header">
+            <text class="record-title">{{record.data.title}}</text>
+            <text class="record-time">{{formatTime(record.timestamp)}}</text>
+            <text class="record-progress">{{record.progress}}%</text>
+          </view>
+
+          <!-- 照片记录 -->
+          <view class="photo-record" wx:if="{{record.type === 'photo'}}">
+            <image
+              src="{{record.data.imagePath}}"
+              class="timeline-image"
+              mode="aspectFill"
+              bindtap="previewImage"
+              data-src="{{record.data.imagePath}}"
+            />
+            <text class="record-desc">{{record.data.description}}</text>
+          </view>
+
+          <!-- 文字记录 -->
+          <view class="note-record" wx:if="{{record.type === 'note'}}">
+            <view class="note-content">
+              <text class="note-text">{{record.data.noteText}}</text>
+            </view>
+          </view>
+
+          <!-- 进度记录 -->
+          <view class="progress-record" wx:if="{{record.type === 'progress'}}">
+            <view class="progress-milestone">
+              <text class="milestone-icon">📈</text>
+              <text class="milestone-text">进度里程碑</text>
+            </view>
+          </view>
+
+          <!-- 删除按钮 -->
+          <view class="record-actions" wx:if="{{task.status === 'in_progress'}}">
+            <text
+              class="delete-record"
+              data-record-id="{{record.id}}"
+              bindtap="deleteProgressRecord"
+            >
+              删除
+            </text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 完成记录 -->
+  <view class="record-section" wx:if="{{task.status === 'completed' && task.verificationData}}">
+    <text class="section-title">完成记录</text>
+
+    <!-- 照片记录 -->
+    <view class="photo-record" wx:if="{{task.verificationData.type === 'photo'}}">
+      <image
+        src="{{task.verificationData.data.imagePath}}"
+        class="record-image"
+        mode="aspectFill"
+        bindtap="previewImage"
+        data-src="{{task.verificationData.data.imagePath}}"
+      />
+      <text class="record-desc">{{task.verificationData.data.description}}</text>
+      <text class="record-time">记录时间：{{task.verificationData.data.recordTime}}</text>
+    </view>
+
+    <!-- 文字记录 -->
+    <view class="note-record" wx:if="{{task.verificationData.type === 'note'}}">
+      <view class="note-content">
+        <text class="note-text">{{task.verificationData.data.noteText}}</text>
+      </view>
+      <text class="record-desc">{{task.verificationData.data.description}}</text>
+      <text class="record-time">记录时间：{{task.verificationData.data.recordTime}}</text>
+    </view>
+  </view>
+
+  <!-- 任务备注 -->
+  <view class="notes-section" wx:if="{{task.notes}}">
+    <text class="section-title">备注</text>
+    <text class="notes-text">{{task.notes}}</text>
+  </view>
+
+  <!-- 任务时间信息 -->
+  <view class="time-info-section">
+    <text class="section-title">时间信息</text>
+    <view class="time-info-grid">
+      <view class="time-item">
+        <text class="time-label">创建时间</text>
+        <text class="time-value">{{task.createdAt}}</text>
+      </view>
+      <view class="time-item" wx:if="{{task.startedAt}}">
+        <text class="time-label">开始时间</text>
+        <text class="time-value">{{task.startedAt}}</text>
+      </view>
+      <view class="time-item" wx:if="{{task.completedAt}}">
+        <text class="time-label">完成时间</text>
+        <text class="time-value">{{task.completedAt}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <!-- 待开始状态 -->
+    <view wx:if="{{task.status === 'pending'}}" class="button-group">
+      <rpg-button 
+        type="primary" 
+        text="开始任务" 
+        bindtap="startTask"
+      />
+      <rpg-button 
+        type="secondary" 
+        text="取消任务" 
+        bindtap="cancelTask"
+      />
+    </view>
+
+    <!-- 进行中状态 -->
+    <view wx:elif="{{task.status === 'in_progress'}}" class="button-group">
+      <rpg-button 
+        type="primary" 
+        text="完成任务" 
+        bindtap="completeTask"
+      />
+      <rpg-button 
+        type="secondary" 
+        text="取消任务" 
+        bindtap="cancelTask"
+      />
+    </view>
+
+    <!-- 已完成状态 -->
+    <view wx:elif="{{task.status === 'completed'}}" class="button-group">
+      <rpg-button 
+        type="accent" 
+        text="任务已完成" 
+        disabled="true"
+      />
+      <rpg-button 
+        type="secondary" 
+        text="删除任务" 
+        bindtap="deleteTask"
+      />
+    </view>
+
+    <!-- 其他状态 -->
+    <view wx:else class="button-group">
+      <rpg-button 
+        type="secondary" 
+        text="删除任务" 
+        bindtap="deleteTask"
+      />
+    </view>
+  </view>
+
+
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-overlay">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>
+
+<!-- 任务不存在 -->
+<view class="empty-state" wx:else>
+  <text class="empty-icon">❌</text>
+  <text class="empty-title">任务不存在</text>
+  <text class="empty-desc">该任务可能已被删除或不存在</text>
+  <rpg-button 
+    type="primary" 
+    text="返回任务列表" 
+    bindtap="navigateBack"
+  />
+</view>

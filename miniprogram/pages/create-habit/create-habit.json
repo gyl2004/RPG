@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "创建习惯",
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

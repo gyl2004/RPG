@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "习惯养成",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

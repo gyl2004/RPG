@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "技能树",
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

@@ -1,0 +1,178 @@
+<!-- AI测试页面 -->
+<view class="ai-test-container">
+  <!-- 页面头部 -->
+  <view class="test-header">
+    <text class="test-title">🤖 DeepSeek R1 AI测试</text>
+    <text class="test-subtitle">测试AI服务连接和功能</text>
+  </view>
+
+  <!-- 测试按钮 -->
+  <view class="test-actions">
+    <rpg-button
+      type="primary"
+      text="🌐 测试网络连接"
+      disabled="{{testing}}"
+      bindtap="testNetworkConnection"
+    />
+    <rpg-button
+      type="secondary"
+      text="🔗 测试API连接"
+      disabled="{{testing}}"
+      bindtap="testAIConnection"
+    />
+    <rpg-button
+      type="secondary"
+      text="🎯 测试任务推荐"
+      disabled="{{testing}}"
+      bindtap="testAIRecommendations"
+    />
+    <rpg-button
+      type="tertiary"
+      text="🗑️ 清空结果"
+      disabled="{{testing}}"
+      bindtap="clearResults"
+    />
+    <rpg-button
+      type="tertiary"
+      text="📋 复制结果"
+      disabled="{{testing || testResults.length === 0}}"
+      bindtap="copyResults"
+    />
+  </view>
+
+  <!-- API信息 -->
+  <view class="api-info">
+    <text class="info-title">API配置信息</text>
+    <view class="info-item">
+      <text class="info-label">服务商:</text>
+      <text class="info-value">ChatAnywhere</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">模型:</text>
+      <text class="info-value">gpt-3.5-turbo</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">端点:</text>
+      <text class="info-value">https://api.chatanywhere.tech/v1</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">状态:</text>
+      <text class="info-value status-ready">就绪</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">版本:</text>
+      <text class="info-value status-stable">稳定版</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">域名白名单:</text>
+      <text class="info-value status-warning">需要配置</text>
+    </view>
+  </view>
+
+  <!-- 域名配置提示 -->
+  <view class="domain-notice">
+    <text class="notice-title">⚠️ 重要提示</text>
+    <text class="notice-content">
+      请确保在微信小程序后台的"开发管理 > 开发设置 > 服务器域名"中添加以下域名到request合法域名：
+    </text>
+    <view class="domain-code">
+      <text class="domain-text">https://api.chatanywhere.tech</text>
+    </view>
+    <text class="notice-hint">
+      如未配置域名白名单，API调用将失败。配置后需要重新编译小程序。
+    </text>
+  </view>
+
+  <!-- ChatAnywhere版本说明 -->
+  <view class="free-version-notice">
+    <text class="notice-title">💡 ChatAnywhere服务说明</text>
+    <text class="notice-content">
+      当前使用的是ChatAnywhere提供的GPT-3.5 Turbo服务，具有以下特点：
+    </text>
+    <view class="feature-list">
+      <view class="feature-item">
+        <text class="feature-icon">🚀</text>
+        <text class="feature-text">稳定可靠的服务</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">⚡</text>
+        <text class="feature-text">响应速度快</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🎯</text>
+        <text class="feature-text">专业的任务推荐能力</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🌐</text>
+        <text class="feature-text">国内访问友好</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🔄</text>
+        <text class="feature-text">失败时自动降级到本地算法</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 测试结果 -->
+  <view class="test-results" wx:if="{{testResults.length > 0}}">
+    <text class="results-title">测试结果</text>
+    <view class="results-list">
+      <view 
+        class="result-item {{item.type}}"
+        wx:for="{{testResults}}"
+        wx:key="id"
+        wx:for-item="item"
+      >
+        <view class="result-header">
+          <text class="result-timestamp">{{item.timestamp}}</text>
+          <view class="result-type-badge {{item.type}}">
+            <text class="badge-text">
+              {{item.type === 'success' ? '成功' : 
+                item.type === 'error' ? '错误' : 
+                item.type === 'task' ? '任务' : '信息'}}
+            </text>
+          </view>
+        </view>
+        <text class="result-message">{{item.message}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-results" wx:else>
+    <text class="empty-icon">🧪</text>
+    <text class="empty-text">暂无测试结果</text>
+    <text class="empty-hint">点击上方按钮开始测试AI功能</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-overlay" wx:if="{{testing}}">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">AI测试中...</text>
+    </view>
+  </view>
+
+  <!-- 使用说明 -->
+  <view class="usage-guide">
+    <text class="guide-title">📖 使用说明</text>
+    <view class="guide-content">
+      <view class="guide-item">
+        <text class="guide-step">1.</text>
+        <text class="guide-text">首先测试API连接，确保网络和密钥正常</text>
+      </view>
+      <view class="guide-item">
+        <text class="guide-step">2.</text>
+        <text class="guide-text">然后测试任务推荐，验证AI生成功能</text>
+      </view>
+      <view class="guide-item">
+        <text class="guide-step">3.</text>
+        <text class="guide-text">查看测试结果，确认AI服务工作正常</text>
+      </view>
+      <view class="guide-item">
+        <text class="guide-step">4.</text>
+        <text class="guide-text">如有问题，可复制结果进行调试</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,76 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/character/character",
+    "pages/skills/skills",
+    "pages/appearance/appearance",
+    "pages/tasks/tasks",
+    "pages/create-task/create-task",
+    "pages/task-detail/task-detail",
+    "pages/habits/habits",
+    "pages/create-habit/create-habit",
+    "pages/habit-detail/habit-detail",
+    "pages/rewards/rewards",
+
+    "pages/story/story",
+    "pages/ai-tasks/ai-tasks",
+    "pages/ai-test/ai-test",
+    "pages/profile/profile",
+    "pages/settings/settings",
+    "pages/admin/admin",
+    "pages/item-collection/item-collection",
+    "pages/dynamic-story/dynamic-story",
+    "pages/example/index"
+  ],
+  "window": {
+    "backgroundColor": "#1a1a2e",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#16213e",
+    "navigationBarTitleText": "现实世界RPG",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#8a8a8a",
+    "selectedColor": "#3b82f6",
+    "backgroundColor": "#16213e",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/character/character",
+        "text": "角色",
+        "iconPath": "images/character.png",
+        "selectedIconPath": "images/character-active.png"
+      },
+      {
+        "pagePath": "pages/tasks/tasks",
+        "text": "任务",
+        "iconPath": "images/tasks.png",
+        "selectedIconPath": "images/tasks-active.png"
+      },
+      {
+        "pagePath": "pages/habits/habits",
+        "text": "习惯",
+        "iconPath": "images/habits.png",
+        "selectedIconPath": "images/habits-active.png"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于基于位置的任务功能"
+    }
+  },
+  "usingComponents": {
+    "rpg-button": "/components/rpg-button/rpg-button"
+  }
+}

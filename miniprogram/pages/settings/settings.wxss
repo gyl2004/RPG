@@ -1,0 +1,209 @@
+/* 用户设置页面样式 */
+
+.settings-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20rpx;
+}
+
+/* 用户信息卡片 */
+.user-card {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.user-avatar {
+  margin-right: 25rpx;
+}
+
+.avatar-image {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  border: 3rpx solid #3b82f6;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.user-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.user-id {
+  font-size: 24rpx;
+  color: #a0a0a0;
+}
+
+.join-date {
+  font-size: 22rpx;
+  color: #888;
+}
+
+.user-actions {
+  margin-left: 20rpx;
+}
+
+/* 设置分组 */
+.settings-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+}
+
+.settings-group {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  backdrop-filter: blur(10rpx);
+}
+
+.group-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 25rpx;
+  padding-bottom: 15rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+/* 设置项 */
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 25rpx 0;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item:active {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10rpx;
+  margin: 0 -15rpx;
+  padding: 25rpx 15rpx;
+}
+
+.setting-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.setting-name {
+  font-size: 28rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.setting-desc {
+  font-size: 24rpx;
+  color: #a0a0a0;
+  line-height: 1.4;
+}
+
+.setting-arrow {
+  font-size: 24rpx;
+  color: #666;
+  margin-left: 15rpx;
+}
+
+/* 危险操作 */
+.setting-item.danger .setting-name {
+  color: #ef4444;
+}
+
+.setting-item.danger .setting-desc {
+  color: #fca5a5;
+}
+
+/* 开关样式 */
+switch {
+  transform: scale(0.8);
+}
+
+/* 加载遮罩 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 40rpx;
+  text-align: center;
+  backdrop-filter: blur(10rpx);
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid rgba(255, 255, 255, 0.3);
+  border-top: 6rpx solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .user-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 20rpx;
+  }
+  
+  .user-avatar {
+    margin-right: 0;
+  }
+  
+  .user-actions {
+    margin-left: 0;
+  }
+  
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15rpx;
+  }
+  
+  .setting-arrow {
+    align-self: flex-end;
+  }
+}

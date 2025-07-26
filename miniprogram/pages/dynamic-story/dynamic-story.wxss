@@ -1,0 +1,442 @@
+/* 动态故事页面样式 */
+.story-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 20rpx;
+  color: #ffffff;
+  font-family: 'PingFang SC', sans-serif;
+}
+
+/* 页面标题 */
+.story-header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.story-title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 10rpx;
+}
+
+.story-subtitle {
+  display: block;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 角色状态栏 */
+.character-status {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20rpx;
+  padding: 25rpx;
+  margin-bottom: 30rpx;
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.character-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.character-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.character-level {
+  font-size: 24rpx;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.2);
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(59, 130, 246, 0.3);
+}
+
+.story-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.stat-item {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 操作区域 */
+.action-section {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.action-hint {
+  display: block;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 15rpx;
+  line-height: 1.4;
+}
+
+/* 当前故事卡片 */
+.current-story {
+  margin-bottom: 30rpx;
+}
+
+.story-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 25rpx;
+  padding: 30rpx;
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 20rpx;
+}
+
+.story-header-info {
+  margin-bottom: 25rpx;
+}
+
+.story-chapter-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 10rpx;
+}
+
+.story-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.story-mood {
+  font-size: 22rpx;
+  padding: 6rpx 12rpx;
+  border-radius: 12rpx;
+  font-weight: bold;
+}
+
+.story-mood.exciting {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1rpx solid rgba(239, 68, 68, 0.3);
+}
+
+.story-mood.mysterious {
+  background: rgba(139, 92, 246, 0.2);
+  color: #8b5cf6;
+  border: 1rpx solid rgba(139, 92, 246, 0.3);
+}
+
+.story-mood.triumphant {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1rpx solid rgba(34, 197, 94, 0.3);
+}
+
+.story-mood.inspiring {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  border: 1rpx solid rgba(59, 130, 246, 0.3);
+}
+
+.story-mood.peaceful {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  border: 1rpx solid rgba(16, 185, 129, 0.3);
+}
+
+.story-mood.empowering {
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1rpx solid rgba(245, 158, 11, 0.3);
+}
+
+.story-time {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* 故事内容 */
+.story-content {
+  margin-bottom: 25rpx;
+}
+
+.story-text {
+  font-size: 28rpx;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: justify;
+}
+
+/* 奖励显示 */
+.story-rewards {
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  margin-bottom: 25rpx;
+  border: 1rpx solid rgba(34, 197, 94, 0.2);
+}
+
+.rewards-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #22c55e;
+  margin-bottom: 15rpx;
+}
+
+.rewards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.reward-item {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 选择分支 */
+.story-choices {
+  margin-bottom: 25rpx;
+}
+
+.choices-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.choices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.choice-item {
+  display: flex;
+  align-items: center;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  border: 1rpx solid rgba(59, 130, 246, 0.2);
+  transition: all 0.3s ease;
+}
+
+.choice-item:active {
+  background: rgba(59, 130, 246, 0.2);
+  transform: scale(0.98);
+}
+
+.choice-content {
+  flex: 1;
+}
+
+.choice-text {
+  display: block;
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 8rpx;
+}
+
+.choice-consequence {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+.choice-arrow {
+  font-size: 24rpx;
+  color: #3b82f6;
+  margin-left: 15rpx;
+}
+
+/* 下一章提示 */
+.next-hints {
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  border: 1rpx solid rgba(139, 92, 246, 0.2);
+}
+
+.hints-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #8b5cf6;
+  margin-bottom: 10rpx;
+}
+
+.hints-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+/* 故事操作按钮 */
+.story-actions {
+  display: flex;
+  gap: 15rpx;
+  margin-bottom: 30rpx;
+}
+
+/* 模态框样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 25rpx;
+  width: 90%;
+  max-width: 600rpx;
+  max-height: 80vh;
+  overflow: hidden;
+  border: 2rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.modal-close {
+  font-size: 40rpx;
+  color: rgba(255, 255, 255, 0.6);
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-body {
+  padding: 20rpx;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* 历史记录 */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.history-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.history-title {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.history-date {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.history-preview {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+  margin-bottom: 10rpx;
+}
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-type {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.empty-history {
+  text-align: center;
+  padding: 60rpx 20rpx;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+}
+
+/* 数据来源 */
+.data-source {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 15rpx;
+  padding: 20rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.source-toggle {
+  text-align: center;
+  padding: 10rpx;
+}
+
+.toggle-text {
+  font-size: 24rpx;
+  color: #3b82f6;
+}
+
+.source-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin-top: 15rpx;
+}
+
+.source-item {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+}

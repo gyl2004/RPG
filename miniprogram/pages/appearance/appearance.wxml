@@ -1,0 +1,300 @@
+<!--角色外观定制页面-->
+<view class="appearance-container">
+  <!-- 角色预览区域 -->
+  <view class="character-preview">
+    <view class="preview-card">
+      <!-- 角色头像 -->
+      <view class="character-avatar-preview">
+        <image 
+          src="{{character.appearance.avatar || character.avatarUrl}}" 
+          class="avatar-image"
+          mode="aspectFill"
+          wx:if="{{character.appearance.avatar || character.avatarUrl}}"
+        />
+        <view class="default-avatar" wx:else>
+          <text class="avatar-icon">⚔️</text>
+        </view>
+        
+
+      </view>
+      
+      <!-- 角色信息 -->
+      <view class="character-info-preview">
+        <text class="character-name">{{character.name}}</text>
+        <text 
+          class="character-title" 
+          style="color: {{titles[currentAppearance.title].color}}"
+        >
+          {{titles[currentAppearance.title].name}}
+        </text>
+        <text class="character-level">Lv.{{character.level}}</text>
+      </view>
+      
+      <!-- 金币显示 -->
+      <view class="coins-display">
+        <text class="coins-icon">💰</text>
+        <text class="coins-amount">{{character.coins || 0}}</text>
+        <rpg-button 
+          type="accent" 
+          text="获得金币" 
+          size="small"
+          bindtap="gainCoins"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 分类选择 -->
+  <view class="category-tabs">
+    <scroll-view scroll-x="true" class="tabs-scroll">
+      <view class="tabs-container">
+        <view 
+          class="category-tab {{currentCategory === 'theme' ? 'active' : ''}}" 
+          data-category="theme"
+          bindtap="switchCategory"
+        >
+          <text class="tab-icon">🎨</text>
+          <text class="tab-name">主题</text>
+        </view>
+
+        <view 
+          class="category-tab {{currentCategory === 'title' ? 'active' : ''}}" 
+          data-category="title"
+          bindtap="switchCategory"
+        >
+          <text class="tab-icon">👑</text>
+          <text class="tab-name">称号</text>
+        </view>
+        <view 
+          class="category-tab {{currentCategory === 'equipment' ? 'active' : ''}}" 
+          data-category="equipment"
+          bindtap="switchCategory"
+        >
+          <text class="tab-icon">⚔️</text>
+          <text class="tab-name">装备</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 物品列表 -->
+  <view class="items-section">
+    <text class="section-title">{{getCategoryName(currentCategory)}}商店</text>
+    
+    <!-- 主题列表 -->
+    <view class="items-grid" wx:if="{{currentCategory === 'theme'}}">
+      <view
+        class="item-card theme-item {{getItemStatusClass(item)}}"
+        wx:for="{{themesArray}}"
+        wx:key="id"
+        wx:for-item="item"
+        data-item="{{item.id}}"
+        bindtap="showItemDetail"
+        style="border-color: {{item.primaryColor}}"
+      >
+        <view class="item-preview" style="background: {{item.backgroundColor}}">
+          <view class="theme-preview-content">
+            <view class="preview-bar" style="background: {{item.primaryColor}}"></view>
+            <view class="preview-accent" style="background: {{item.accentColor}}"></view>
+          </view>
+        </view>
+        <view class="item-info">
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-price" wx:if="{{item.price > 0}}">💰{{item.price}}</text>
+          <text class="item-free" wx:else>免费</text>
+        </view>
+        <view class="item-status">
+          <text class="status-icon" wx:if="{{currentAppearance.theme === item.id}}">✅</text>
+          <text class="status-icon" wx:elif="{{item.price === 0}}">🆓</text>
+          <text class="status-icon" wx:else>🔒</text>
+        </view>
+      </view>
+    </view>
+
+
+
+    <!-- 称号列表 -->
+    <view class="items-list" wx:if="{{currentCategory === 'title'}}">
+      <view
+        class="item-card title-item {{getItemStatusClass(item)}}"
+        wx:for="{{titlesArray}}"
+        wx:key="id"
+        wx:for-item="item"
+        data-item="{{item.id}}"
+        bindtap="showItemDetail"
+      >
+        <view class="title-preview">
+          <text class="title-text" style="color: {{item.color}}">{{item.name}}</text>
+        </view>
+        <view class="item-info">
+          <text class="item-description">{{item.description}}</text>
+          <text class="unlock-condition">解锁条件: Lv.{{item.unlockLevel}}</text>
+        </view>
+        <view class="item-status">
+          <text class="status-icon" wx:if="{{currentAppearance.title === item.id}}">✅</text>
+          <text class="status-icon" wx:else>🔒</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 装备列表 -->
+    <view class="items-grid" wx:if="{{currentCategory === 'equipment'}}">
+      <view
+        class="item-card equipment-item {{getItemStatusClass(item)}}"
+        wx:for="{{equipmentSkinsArray}}"
+        wx:key="id"
+        wx:for-item="item"
+        data-item="{{item.id}}"
+        bindtap="showItemDetail"
+      >
+        <view class="item-preview">
+          <image 
+            src="{{item.image}}"
+            class="equipment-image"
+            mode="aspectFit"
+          />
+        </view>
+        <view class="item-info">
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-category">{{item.category === 'weapon' ? '武器' : '护甲'}}</text>
+          <text class="item-price" wx:if="{{item.price > 0}}">💰{{item.price}}</text>
+          <text class="item-free" wx:else>免费</text>
+        </view>
+        <view class="item-status">
+          <text class="status-icon" wx:if="{{currentAppearance.equipment[item.category] === item.id}}">✅</text>
+          <text class="status-icon" wx:elif="{{item.price === 0}}">🆓</text>
+          <text class="status-icon" wx:else>🔒</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 物品详情模态框 -->
+  <view class="modal-overlay" wx:if="{{showItemModal}}" bindtap="closeItemModal">
+    <view class="item-modal" catchtap="">
+      <view class="modal-header">
+        <text class="modal-title">{{selectedItem.name}}</text>
+        <view class="modal-price" wx:if="{{selectedItem.price > 0}}">
+          <text class="price-icon">💰</text>
+          <text class="price-text">{{selectedItem.price}}</text>
+        </view>
+        <text class="modal-free" wx:else>免费</text>
+      </view>
+
+      <view class="modal-content">
+        <!-- 物品预览 -->
+        <view class="item-preview-large">
+          <!-- 主题预览 -->
+          <view
+            class="theme-preview-large"
+            wx:if="{{selectedItem.itemType === 'theme'}}"
+            style="background: {{selectedItem.backgroundColor}}; border-color: {{selectedItem.primaryColor}}"
+          >
+            <view class="theme-demo">
+              <view class="demo-header" style="background: {{selectedItem.primaryColor}}">
+                <text class="demo-title">主题预览</text>
+              </view>
+              <view class="demo-content" style="background: {{selectedItem.cardColor}}">
+                <view class="demo-accent" style="background: {{selectedItem.accentColor}}"></view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 头像框预览 -->
+          <view class="frame-preview-large" wx:if="{{selectedItem.itemType === 'avatarFrame'}}">
+            <view class="large-avatar">
+              <image
+                src="{{character.appearance.avatar || character.avatarUrl}}"
+                class="large-avatar-image"
+                mode="aspectFill"
+                wx:if="{{character.appearance.avatar || character.avatarUrl}}"
+              />
+              <view class="large-default-avatar" wx:else>
+                <text class="large-avatar-icon">⚔️</text>
+              </view>
+              <image
+                src="{{selectedItem.frameImage}}"
+                class="large-avatar-frame"
+                mode="aspectFill"
+                wx:if="{{selectedItem.frameImage}}"
+              />
+            </view>
+          </view>
+
+          <!-- 称号预览 -->
+          <view class="title-preview-large" wx:if="{{selectedItem.itemType === 'title'}}">
+            <text class="large-title-text" style="color: {{selectedItem.color}}">
+              {{selectedItem.name}}
+            </text>
+          </view>
+
+          <!-- 装备预览 -->
+          <view class="equipment-preview-large" wx:if="{{selectedItem.itemType === 'equipment'}}">
+            <image
+              src="{{selectedItem.image}}"
+              class="large-equipment-image"
+              mode="aspectFit"
+            />
+          </view>
+        </view>
+
+        <!-- 物品描述 -->
+        <text class="item-description-full">{{selectedItem.description}}</text>
+
+        <!-- 解锁条件 -->
+        <view class="unlock-info" wx:if="{{!selectedItem.unlocked}}">
+          <text class="unlock-title">解锁条件</text>
+          <text class="unlock-reason">{{selectedItem.unlockReason}}</text>
+        </view>
+
+        <!-- 状态信息 -->
+        <view class="status-info">
+          <text class="status-label">状态</text>
+          <text class="status-text equipped" wx:if="{{selectedItem.isEquipped}}">已装备</text>
+          <text class="status-text owned" wx:elif="{{selectedItem.isOwned}}">已拥有</text>
+          <text class="status-text available" wx:elif="{{selectedItem.unlocked}}">可购买</text>
+          <text class="status-text locked" wx:else>未解锁</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="modal-actions">
+        <rpg-button
+          type="secondary"
+          text="预览"
+          size="small"
+          bindtap="previewItem"
+          wx:if="{{selectedItem.unlocked}}"
+        />
+        <rpg-button
+          type="primary"
+          text="购买"
+          size="small"
+          bindtap="purchaseItem"
+          wx:if="{{selectedItem.canPurchase}}"
+        />
+        <rpg-button
+          type="accent"
+          text="装备"
+          size="small"
+          bindtap="equipItem"
+          wx:if="{{selectedItem.canEquip}}"
+        />
+        <rpg-button
+          type="secondary"
+          text="关闭"
+          size="small"
+          bindtap="closeItemModal"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-overlay">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+</view>

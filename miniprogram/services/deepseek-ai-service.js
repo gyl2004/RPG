@@ -1,8 +1,8 @@
 // DeepSeek R1 AI服务
 class DeepSeekAIService {
   constructor() {
-    this.apiKey = 'sk-e5g8BTyjj4MUzyw8iA6NL0JDcOGzTbN7a3xHhShoKrESWgxu';
-    this.baseURL = 'https://api.chatanywhere.tech/v1';
+    this.apiKey = '';
+    this.baseURL = '';
     this.model = 'gpt-3.5-turbo'; // 使用GPT-3.5 Turbo模型
     this.lastRequestTime = 0; // 记录上次请求时间
     this.rateLimitDelay = 1000; // ChatAnywhere限制相对宽松，1秒间隔

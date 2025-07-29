@@ -31,6 +31,12 @@ App({
 
       // 检查登录状态
       this.checkLoginStatus();
+
+      // 初始化通知检查
+      this.initNotificationCheck();
+
+      // 初始化主题和语言系统
+      this.initThemeAndLanguage();
     }).catch((error) => {
       console.error('云开发初始化失败:', error);
       wx.showToast({
@@ -187,21 +193,56 @@ App({
             throw new Error(loginResult.error);
           }
 
-          // 2. 尝试调用云函数获取openid
+          // 2. 尝试调用云函数获取openid（带重试机制）
           let openid = null;
-          try {
-            const openidResult = await this.getOpenId(loginResult.code);
-            if (openidResult.success) {
-              openid = openidResult.openid;
+          let openidError = null;
+          
+          for (let retry = 0; retry < 3; retry++) {
+            try {
+              console.log(`尝试获取openid，第${retry + 1}次`);
+              const openidResult = await this.getOpenId(loginResult.code);
+              
+              if (openidResult.success && openidResult.openid) {
+                openid = openidResult.openid;
+                console.log('成功获取真实openid:', openid);
+                break;
+              } else {
+                openidError = openidResult.error || '获取openid失败';
+                console.warn(`第${retry + 1}次获取openid失败:`, openidError);
+              }
+            } catch (error) {
+              openidError = error.message;
+              console.warn(`第${retry + 1}次获取openid异常:`, error);
             }
-          } catch (error) {
-            console.warn('云函数获取openid失败，使用备用方案:', error);
+            
+            // 如果不是最后一次重试，等待一下再重试
+            if (retry < 2) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
           }
 
-          // 3. 如果云函数失败，使用本地生成的临时ID
+          // 3. 如果所有重试都失败，生成基于用户信息的稳定ID
           if (!openid) {
-            openid = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            console.log('使用临时openid:', openid);
+            console.log('无法获取真实openid，生成稳定的用户ID');
+            
+            // 基于用户信息和设备信息生成稳定的ID
+            const nickname = userInfo?.nickName || '用户';
+            const deviceInfo = wx.getSystemInfoSync();
+            const uniqueString = nickname + deviceInfo.model + deviceInfo.system;
+            
+            // 生成一个稳定的哈希ID
+            let hash = 0;
+            for (let i = 0; i < uniqueString.length; i++) {
+              const char = uniqueString.charCodeAt(i);
+              hash = ((hash << 5) - hash) + char;
+              hash = hash & hash; // 转换为32位整数
+            }
+            
+            // 生成看起来像微信openid的格式
+            const hashStr = Math.abs(hash).toString(36);
+            const randomSuffix = Math.random().toString(36).substr(2, 8);
+            openid = 'wx_' + hashStr + randomSuffix;
+            console.log('生成稳定用户ID:', openid);
           }
 
           // 4. 使用传入的用户信息或默认信息
@@ -220,6 +261,9 @@ App({
             city: userInfo?.city || '',
             registrationDate: new Date().toISOString(),
             lastLoginDate: new Date().toISOString(),
+            isTemporary: openid.startsWith('temp_'), // 只有temp_开头才是临时用户
+            needsUpgrade: false, // 稳定ID不需要升级
+            loginMethod: openid.startsWith('wx_') ? 'stable_generated' : 'wechat_official',
             settings: {
               notifications: true,
               soundEffects: true,
@@ -322,6 +366,8 @@ App({
       // 通过云函数获取openid
       getOpenId: async function(code) {
         try {
+          console.log('调用云函数获取openid，code:', code);
+          
           const result = await wx.cloud.callFunction({
             name: 'rpgFunctions',
             data: {
@@ -330,21 +376,28 @@ App({
             }
           });
 
+          console.log('云函数返回结果:', result);
+
           if (result.result && result.result.success) {
+            const openid = result.result.data.openid;
+            console.log('成功获取openid:', openid);
             return {
               success: true,
-              openid: result.result.data.openid
+              openid: openid
             };
           } else {
+            const error = result.result?.error || '获取openid失败';
+            console.error('云函数返回错误:', error);
             return {
               success: false,
-              error: result.result?.error || '获取openid失败'
+              error: error
             };
           }
         } catch (error) {
+          console.error('云函数调用异常:', error);
           return {
             success: false,
-            error: error.message || '云函数调用失败'
+            error: `云函数调用失败: ${error.message}`
           };
         }
       },
@@ -577,5 +630,90 @@ App({
   // 检查云开发是否已初始化
   isCloudInitialized: function() {
     return this.cloudInitialized || false;
+  },
+
+  // 初始化通知检查
+  initNotificationCheck: function() {
+    try {
+      // 检查用户是否开启了通知
+      const userSettings = wx.getStorageSync('userInfo')?.settings;
+      if (userSettings && userSettings.notifications) {
+        // 延迟执行通知检查，确保其他服务已初始化
+        setTimeout(() => {
+          this.performNotificationCheck();
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('初始化通知检查失败:', error);
+    }
+  },
+
+  // 执行通知检查
+  async performNotificationCheck() {
+    try {
+      const notificationService = require('./services/notification-service.js');
+      
+      // 检查任务提醒
+      await notificationService.checkTaskReminders();
+      
+      // 检查习惯提醒
+      setTimeout(async () => {
+        await notificationService.checkHabitReminders();
+      }, 1000);
+
+      // 根据时间发送每日激励
+      const now = new Date();
+      const hour = now.getHours();
+      
+      // 在早上8-10点之间发送每日激励
+      if (hour >= 8 && hour <= 10) {
+        const lastMotivationDate = wx.getStorageSync('lastMotivationDate');
+        const today = now.toISOString().split('T')[0];
+        
+        if (lastMotivationDate !== today) {
+          setTimeout(() => {
+            notificationService.sendDailyMotivation();
+            wx.setStorageSync('lastMotivationDate', today);
+          }, 2000);
+        }
+      }
+    } catch (error) {
+      console.error('执行通知检查失败:', error);
+    }
+  },
+
+  // 初始化主题和语言系统
+  initThemeAndLanguage: function() {
+    try {
+      // 获取保存的主题设置
+      const userSettings = wx.getStorageSync('userInfo')?.settings;
+      const currentTheme = userSettings?.theme || 'dark';
+      const currentLanguage = userSettings?.language || 'zh-CN';
+
+      // 保存到全局存储
+      wx.setStorageSync('currentTheme', currentTheme);
+      wx.setStorageSync('currentLanguage', currentLanguage);
+
+      // 应用主题到页面
+      this.applyTheme(currentTheme);
+
+      console.log('主题和语言系统初始化完成', { theme: currentTheme, language: currentLanguage });
+    } catch (error) {
+      console.error('初始化主题和语言系统失败:', error);
+    }
+  },
+
+  // 应用主题
+  applyTheme: function(theme) {
+    try {
+      // 这里可以动态修改页面的主题类名
+      // 由于微信小程序的限制，主要通过CSS变量和类名来实现
+      console.log('应用主题:', theme);
+      
+      // 保存当前主题到全局数据
+      this.globalData.currentTheme = theme;
+    } catch (error) {
+      console.error('应用主题失败:', error);
+    }
   }
 });

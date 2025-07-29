@@ -1308,9 +1308,12 @@ class StoryService {
       // 给予奖励
       if (event.effects) {
         try {
-          const rewardService = require('./reward-service.js');
-          if (rewardService && typeof rewardService.giveRewards === 'function') {
-            rewardService.giveRewards(event.effects);
+          const characterService = require('./character-service.js');
+          if (event.effects.experience) {
+            characterService.addExperience(event.effects.experience);
+          }
+          if (event.effects.coins) {
+            characterService.addCoins(event.effects.coins);
           }
         } catch (rewardError) {
           console.error('给予随机事件奖励失败:', rewardError);
@@ -2145,14 +2148,7 @@ class StoryService {
   getUserStats() {
     try {
       // 获取各种服务的统计数据
-      let rewardService, socialService;
-
-      try {
-        rewardService = require('./reward-service.js');
-      } catch (error) {
-        console.error('无法加载奖励服务:', error);
-        rewardService = null;
-      }
+      let socialService;
 
       // 社交服务已移除
       socialService = null;
@@ -2254,12 +2250,15 @@ class StoryService {
       progress.completedChapters.push(chapterId);
       progress.storyPoints += 100;
 
-      // 给予章节奖励
+      // 给予章节奖励到角色系统
       if (chapter.rewards) {
         try {
-          const rewardService = require('./reward-service.js');
-          if (rewardService && typeof rewardService.giveRewards === 'function') {
-            rewardService.giveRewards(chapter.rewards);
+          const characterService = require('./character-service.js');
+          if (chapter.rewards.experience) {
+            characterService.addExperience(chapter.rewards.experience);
+          }
+          if (chapter.rewards.coins) {
+            characterService.addCoins(chapter.rewards.coins);
           }
         } catch (error) {
           console.error('给予章节奖励失败:', error);

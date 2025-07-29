@@ -1,5 +1,5 @@
 // 登录页面
-import { getAuthService, checkLoginStatus } from '../../utils/auth-helper.js';
+const { getAuthService, checkLoginStatus } = require('../../utils/auth-helper.js');
 
 Page({
   data: {

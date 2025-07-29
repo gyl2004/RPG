@@ -1,6 +1,6 @@
 {
-  "navigationBarTitleText": "奖励中心",
-  "enablePullDownRefresh": true,
+  "navigationBarTitleText": "编辑资料",
+  "navigationStyle": "custom",
   "usingComponents": {
     "rpg-button": "/components/rpg-button/rpg-button"
   }

@@ -1,6 +1,6 @@
 /* TDesign主题配置 - 现实世界RPG风格 */
 
-/* 主色调配置 */
+/* 深色主题（默认） */
 :root {
   --td-brand-color: #3b82f6;
   --td-brand-color-1: #1e40af;
@@ -28,6 +28,28 @@
   --td-border-radius-default: 20rpx;
   --td-border-radius-medium: 15rpx;
   --td-border-radius-small: 10rpx;
+}
+
+/* 浅色主题 */
+.theme-light {
+  --td-bg-color-page: #f8fafc;
+  --td-bg-color-container: rgba(0, 0, 0, 0.05);
+  --td-bg-color-card: rgba(0, 0, 0, 0.02);
+  
+  --td-text-color-primary: #1f2937;
+  --td-text-color-secondary: #6b7280;
+  --td-text-color-placeholder: #9ca3af;
+}
+
+/* 深色主题 */
+.theme-dark {
+  --td-bg-color-page: #1a1a2e;
+  --td-bg-color-container: rgba(255, 255, 255, 0.1);
+  --td-bg-color-card: rgba(255, 255, 255, 0.05);
+  
+  --td-text-color-primary: #ffffff;
+  --td-text-color-secondary: #a0a0a0;
+  --td-text-color-placeholder: #6b7280;
 }
 
 /* 按钮样式重写 */

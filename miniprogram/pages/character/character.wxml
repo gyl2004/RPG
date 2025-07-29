@@ -155,23 +155,7 @@
       />
     </view>
 
-    <view class="test-actions">
-      <text class="test-label">测试功能</text>
-      <view class="test-buttons">
-        <rpg-button
-          type="accent"
-          text="获得经验"
-          size="small"
-          bindtap="testGainExp"
-        />
-        <rpg-button
-          type="accent"
-          text="完成任务"
-          size="small"
-          bindtap="simulateTaskComplete"
-        />
-      </view>
-    </view>
+
   </view>
 
   <!-- 属性详情模态框 -->

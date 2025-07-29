@@ -55,35 +55,7 @@
 
   <!-- 快速操作 -->
   <view class="quick-actions">
-    <view class="action-button" bindtap="navigateToCharacter">
-      <text class="action-icon">👤</text>
-      <text class="action-text">角色</text>
-    </view>
-    <view class="action-button" bindtap="navigateToTasks">
-      <text class="action-icon">📋</text>
-      <text class="action-text">任务</text>
-    </view>
-    <view class="action-button" bindtap="navigateToHabits">
-      <text class="action-icon">🎯</text>
-      <text class="action-text">习惯</text>
-    </view>
-    <view class="action-button" bindtap="navigateToRewards">
-      <text class="action-icon">🏆</text>
-      <text class="action-text">奖励</text>
-    </view>
-    <view class="action-button" bindtap="navigateToSocial">
-      <text class="action-icon">👥</text>
-      <text class="action-text">社交</text>
-    </view>
-    <view class="action-button" bindtap="navigateToStory">
-      <text class="action-icon">📖</text>
-      <text class="action-text">故事</text>
-    </view>
-    <view class="action-button ai-button" bindtap="navigateToAITasks">
-      <text class="action-icon">🤖</text>
-      <text class="action-text">AI推荐</text>
-      <text class="ai-badge">GPT</text>
-    </view>
+
     <view class="action-button collection-button" bindtap="navigateToItemCollection">
       <text class="action-icon">🎒</text>
       <text class="action-text">我的收藏</text>
@@ -93,6 +65,10 @@
       <text class="action-icon">🎭</text>
       <text class="action-text">冒险日记</text>
       <text class="story-badge">AI</text>
+    </view>
+    <view class="action-button" bindtap="navigateToSettings">
+      <text class="action-icon">⚙️</text>
+      <text class="action-text">设置</text>
     </view>
   </view>
 

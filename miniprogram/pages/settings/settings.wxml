@@ -10,9 +10,9 @@
       />
     </view>
     <view class="user-info">
-      <text class="user-name">{{userInfo.nickname || '用户'}}</text>
-      <text class="user-id">ID: {{userInfo._id ? userInfo._id.slice(-8) : 'Unknown'}}</text>
-      <text class="join-date">加入时间: {{userInfo.registrationDate ? userInfo.registrationDate.slice(0, 10) : '未知'}}</text>
+      <text class="user-name">{{userInfo.nickname || '冒险者'}}</text>
+      
+      <text class="join-date">加入时间: {{userInfo.formattedJoinDate || '今天'}}</text>
     </view>
     <view class="user-actions">
       <rpg-button 
@@ -21,6 +21,14 @@
         size="small"
         bindtap="editProfile"
       />
+    </view>
+  </view>
+
+  <!-- 临时用户警告 -->
+  <view wx:if="{{userInfo.isTemporary}}" class="temp-user-warning">
+    <text class="warning-icon">⚠️</text>
+    <view class="warning-content">
+      <text class="warning-text">您当前使用的是临时账户，数据可能无法同步到云端。建议升级为正式微信账户以确保数据安全。</text>
     </view>
   </view>
 
@@ -44,18 +52,7 @@
         />
       </view>
 
-      <view class="setting-item">
-        <view class="setting-info">
-          <text class="setting-name">音效</text>
-          <text class="setting-desc">播放操作音效和背景音乐</text>
-        </view>
-        <switch 
-          checked="{{settings.soundEffects}}" 
-          data-key="soundEffects"
-          bindchange="onSwitchChange"
-          color="#3b82f6"
-        />
-      </view>
+
 
       <view class="setting-item">
         <view class="setting-info">
@@ -70,60 +67,30 @@
         />
       </view>
 
-      <view class="setting-item">
-        <view class="setting-info">
-          <text class="setting-name">隐私模式</text>
-          <text class="setting-desc">隐藏个人信息和统计数据</text>
-        </view>
-        <switch 
-          checked="{{settings.privacyMode}}" 
-          data-key="privacyMode"
-          bindchange="onSwitchChange"
-          color="#3b82f6"
-        />
-      </view>
+
     </view>
 
-    <!-- 外观设置 -->
-    <view class="settings-group">
-      <text class="group-title">外观设置</text>
-      
-      <view class="setting-item" bindtap="selectTheme">
-        <view class="setting-info">
-          <text class="setting-name">主题</text>
-          <text class="setting-desc">{{settings.theme === 'dark' ? '深色主题' : '浅色主题'}}</text>
-        </view>
-        <text class="setting-arrow">></text>
-      </view>
 
-      <view class="setting-item" bindtap="selectLanguage">
-        <view class="setting-info">
-          <text class="setting-name">语言</text>
-          <text class="setting-desc">{{settings.language === 'zh-CN' ? '简体中文' : 'English'}}</text>
-        </view>
-        <text class="setting-arrow">></text>
-      </view>
-    </view>
 
     <!-- 数据管理 -->
     <view class="settings-group">
       <text class="group-title">数据管理</text>
       
-      <view class="setting-item" bindtap="viewStatistics">
+      <view class="setting-item" bindtap="triggerManualBackup">
         <view class="setting-info">
-          <text class="setting-name">我的统计</text>
-          <text class="setting-desc">查看使用统计和成就</text>
+          <text class="setting-name">立即备份</text>
+          <text class="setting-desc">手动备份数据到云端</text>
         </view>
         <text class="setting-arrow">></text>
       </view>
 
-      <view class="setting-item" bindtap="exportData">
-        <view class="setting-info">
-          <text class="setting-name">导出数据</text>
-          <text class="setting-desc">备份个人数据</text>
-        </view>
-        <text class="setting-arrow">></text>
-      </view>
+
+
+
+
+
+
+
 
       <view class="setting-item" bindtap="clearCache">
         <view class="setting-info">
@@ -154,10 +121,20 @@
         <text class="setting-arrow">></text>
       </view>
 
-      <view class="setting-item" bindtap="onShareAppMessage">
+      <view class="setting-item" bindtap="shareApp">
         <view class="setting-info">
           <text class="setting-name">分享应用</text>
           <text class="setting-desc">推荐给朋友</text>
+        </view>
+        <text class="setting-arrow">></text>
+      </view>
+
+
+
+      <view wx:if="{{userInfo.isTemporary}}" class="setting-item upgrade-item" bindtap="upgradeAccount">
+        <view class="setting-info">
+          <text class="setting-name">升级账户</text>
+          <text class="setting-desc">将临时账户升级为正式微信账户</text>
         </view>
         <text class="setting-arrow">></text>
       </view>

@@ -355,15 +355,17 @@ class TaskService {
           task.verificationData = additionalData.verificationData;
         }
 
-        // 给予任务奖励
+        // 给予任务奖励到角色系统
         try {
-          const rewardService = require('./reward-service.js');
-          rewardService.giveRewards(task.rewards);
-
-          // 更新统计数据
-          const userRewards = rewardService.getUserRewards();
-          userRewards.statistics.totalTasksCompleted++;
-          rewardService.saveUserRewards(userRewards);
+          const characterService = require('./character-service.js');
+          if (task.rewards) {
+            if (task.rewards.experience) {
+              characterService.addExperience(task.rewards.experience);
+            }
+            if (task.rewards.coins) {
+              characterService.addCoins(task.rewards.coins);
+            }
+          }
 
           // 记录用户活动
           const userService = require('./user-service.js');

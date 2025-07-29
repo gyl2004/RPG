@@ -11,12 +11,11 @@
     "pages/habits/habits",
     "pages/create-habit/create-habit",
     "pages/habit-detail/habit-detail",
-    "pages/rewards/rewards",
-
     "pages/story/story",
     "pages/ai-tasks/ai-tasks",
     "pages/ai-test/ai-test",
     "pages/profile/profile",
+    "pages/profile-edit/profile-edit",
     "pages/settings/settings",
     "pages/admin/admin",
     "pages/item-collection/item-collection",

@@ -5,7 +5,7 @@
  * 获取用户服务实例（简化版）
  * @returns {object|null} 用户服务实例
  */
-export function getUserService() {
+function getUserService() {
   try {
     // 检查云开发是否已初始化
     const app = getApp();
@@ -19,26 +19,36 @@ export function getUserService() {
       // 更新用户设置
       updateUserSettings: async function(settings) {
         try {
-          const result = await wx.cloud.callFunction({
-            name: 'rpgFunctions',
-            data: {
-              type: 'updateUser',
-              data: { settings }
-            }
-          });
-
-          if (result.result && result.result.success) {
-            // 更新本地存储
-            const userInfo = wx.getStorageSync('userInfo');
-            if (userInfo) {
-              userInfo.settings = { ...userInfo.settings, ...settings };
-              wx.setStorageSync('userInfo', userInfo);
-            }
-            return { success: true };
-          } else {
-            return { success: false, error: result.result?.error || '更新失败' };
+          // 首先更新本地存储
+          const userInfo = wx.getStorageSync('userInfo');
+          if (userInfo) {
+            userInfo.settings = { ...userInfo.settings, ...settings };
+            wx.setStorageSync('userInfo', userInfo);
           }
+
+          // 尝试同步到云端
+          try {
+            const result = await wx.cloud.callFunction({
+              name: 'rpgFunctions',
+              data: {
+                type: 'updateUser',
+                data: { settings }
+              }
+            });
+
+            if (result.result && result.result.success) {
+              console.log('设置已同步到云端');
+            } else {
+              console.log('云端同步失败，但本地已保存');
+            }
+          } catch (cloudError) {
+            console.log('云端同步失败，但本地已保存:', cloudError);
+          }
+
+          // 无论云端是否成功，本地已保存就算成功
+          return { success: true };
         } catch (error) {
+          console.error('更新设置失败:', error);
           return { success: false, error: error.message };
         }
       },
@@ -118,7 +128,7 @@ export function getUserService() {
  * @param {function} callback 回调函数
  * @returns {Promise} 执行结果
  */
-export async function withUserService(callback) {
+async function withUserService(callback) {
   try {
     const userService = getUserService();
     if (userService && callback) {
@@ -136,7 +146,7 @@ export async function withUserService(callback) {
  * @param {object} settings 设置数据
  * @returns {Promise} 更新结果
  */
-export async function updateUserSettings(settings) {
+async function updateUserSettings(settings) {
   return withUserService(async (userService) => {
     return await userService.updateUserSettings(settings);
   });
@@ -146,7 +156,7 @@ export async function updateUserSettings(settings) {
  * 获取用户详细信息
  * @returns {Promise} 用户详细信息
  */
-export async function getUserDetails() {
+async function getUserDetails() {
   return withUserService(async (userService) => {
     return await userService.getUserDetails();
   });
@@ -156,7 +166,7 @@ export async function getUserDetails() {
  * 导出用户数据
  * @returns {Promise} 导出结果
  */
-export async function exportUserData() {
+async function exportUserData() {
   return withUserService(async (userService) => {
     return await userService.exportUserData();
   });
@@ -166,7 +176,7 @@ export async function exportUserData() {
  * 删除用户账户
  * @returns {Promise} 删除结果
  */
-export async function deleteUserAccount() {
+async function deleteUserAccount() {
   return withUserService(async (userService) => {
     return await userService.deleteUserAccount();
   });
@@ -176,8 +186,19 @@ export async function deleteUserAccount() {
  * 刷新用户数据
  * @returns {Promise} 刷新结果
  */
-export async function refreshUserData() {
+async function refreshUserData() {
   return withUserService(async (userService) => {
     return await userService.refreshUserData();
   });
 }
+
+// 导出所有函数
+module.exports = {
+  getUserService,
+  withUserService,
+  updateUserSettings,
+  getUserDetails,
+  exportUserData,
+  deleteUserAccount,
+  refreshUserData
+};

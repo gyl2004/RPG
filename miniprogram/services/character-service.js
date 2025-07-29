@@ -833,6 +833,49 @@ class CharacterService {
       message: `成功重置属性，回收了 ${totalPoints} 个属性点`
     };
   }
+
+  /**
+   * 添加金币
+   * @param {number} coinGain 获得的金币数量
+   * @returns {object} 添加结果
+   */
+  async addCoins(coinGain) {
+    console.log('💰 CharacterService.addCoins 被调用, coinGain:', coinGain);
+    const character = this.getCurrentCharacter();
+    console.log('💰 获取到的角色:', character);
+    
+    if (!character) {
+      console.error('❌ 角色不存在');
+      return { success: false, error: '角色不存在' };
+    }
+
+    const oldCoins = character.coins || 0;
+    const newCoins = Math.max(0, oldCoins + coinGain); // 确保金币不会为负数
+
+    // 更新角色数据
+    const updateData = {
+      coins: newCoins
+    };
+
+    // 异步更新角色数据
+    const updateResult = await this.updateCharacter(updateData);
+    console.log('💰 角色数据更新结果:', updateResult);
+
+    if (!updateResult) {
+      console.error('❌ 角色数据更新失败');
+      return { success: false, error: '角色数据更新失败' };
+    }
+
+    const result = {
+      success: true,
+      coinGain,
+      oldCoins,
+      newCoins
+    };
+
+    console.log('💰 addCoins 返回结果:', result);
+    return result;
+  }
 }
 
 // 导出单例实例

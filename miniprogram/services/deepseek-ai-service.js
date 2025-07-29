@@ -1,11 +1,57 @@
 // DeepSeek R1 AI服务
 class DeepSeekAIService {
   constructor() {
-    this.apiKey = '';
-    this.baseURL = '';
+    // ChatAnywhere API配置
+    this.apiKey = 'sk-e5g8BTyjj4MUzyw8iA6NL0JDcOGzTbN7a3xHhShoKrESWgxu'; // 需要替换为实际的API密钥
+    this.baseURL = 'https://api.chatanywhere.tech/v1'; // ChatAnywhere API端点
     this.model = 'gpt-3.5-turbo'; // 使用GPT-3.5 Turbo模型
     this.lastRequestTime = 0; // 记录上次请求时间
     this.rateLimitDelay = 1000; // ChatAnywhere限制相对宽松，1秒间隔
+
+    // 初始化时检查配置
+    this.initializeConfig();
+  }
+
+  /**
+   * 初始化配置
+   */
+  initializeConfig() {
+    try {
+      // 从本地存储或配置文件读取API密钥
+      const storedApiKey = wx.getStorageSync('chatanywhere_api_key');
+      if (storedApiKey) {
+        this.apiKey = storedApiKey;
+      }
+
+      console.log('🔧 ChatAnywhere AI服务初始化:', {
+        baseURL: this.baseURL,
+        model: this.model,
+        hasApiKey: !!this.apiKey && this.apiKey !== 'sk-your-api-key-here'
+      });
+
+      // 如果没有有效的API密钥，提供降级方案
+      if (!this.apiKey || this.apiKey === 'sk-your-api-key-here') {
+        console.warn('⚠️ ChatAnywhere API密钥未配置，将使用本地智能算法作为降级方案');
+      }
+    } catch (error) {
+      console.error('❌ ChatAnywhere AI服务初始化失败:', error);
+    }
+  }
+
+  /**
+   * 检查API是否可用
+   */
+  isApiAvailable() {
+    return this.apiKey && this.apiKey !== 'sk-your-api-key-here' && this.baseURL;
+  }
+
+  /**
+   * 设置API密钥
+   */
+  setApiKey(apiKey) {
+    this.apiKey = apiKey;
+    wx.setStorageSync('chatanywhere_api_key', apiKey);
+    console.log('✅ ChatAnywhere API密钥已更新');
   }
 
   /**
@@ -114,11 +160,18 @@ class DeepSeekAIService {
     try {
       console.log('🤖 开始生成AI任务推荐...');
 
+      // 检查API是否可用
+      if (!this.isApiAvailable()) {
+        console.warn('⚠️ ChatAnywhere API不可用，使用本地智能算法');
+        return this.generateLocalTaskRecommendations(userProfile, emotionalState, characterGrowth, userStats);
+      }
+
       // 检查速率限制
       const rateLimitCheck = this.checkRateLimit();
       if (!rateLimitCheck.canRequest) {
         console.warn('⏰ 速率限制:', rateLimitCheck.message);
-        throw new Error(rateLimitCheck.message);
+        console.warn('⚠️ 降级到本地智能算法');
+        return this.generateLocalTaskRecommendations(userProfile, emotionalState, characterGrowth, userStats);
       }
 
       const prompt = this.buildTaskRecommendationPrompt(userProfile, emotionalState, characterGrowth, userStats);
@@ -146,7 +199,11 @@ class DeepSeekAIService {
 
       return recommendations;
     } catch (error) {
-      console.error('DeepSeek AI任务推荐失败:', error);
+      console.error('ChatAnywhere AI任务推荐失败:', error);
+
+      // 网络错误或API错误时降级到本地算法
+      console.warn('⚠️ AI服务失败，降级到本地智能算法');
+      return this.generateLocalTaskRecommendations(userProfile, emotionalState, characterGrowth, userStats);
 
       // 特别处理速率限制错误
       if (error.message.includes('429') || error.message.includes('Rate limit')) {
@@ -295,6 +352,152 @@ class DeepSeekAIService {
         }
       });
     });
+  }
+
+  /**
+   * 本地智能算法生成任务推荐（降级方案）
+   */
+  generateLocalTaskRecommendations(userProfile, emotionalState, characterGrowth, userStats) {
+    try {
+      console.log('🧠 使用本地智能算法生成任务推荐...');
+
+      const recommendations = [];
+      const currentHour = new Date().getHours();
+      const dayOfWeek = new Date().getDay();
+
+      // 基础任务模板
+      const taskTemplates = {
+        morning: [
+          { title: '晨间阅读', category: '学习', difficulty: 2, estimatedTime: 30, priority: 3 },
+          { title: '制定今日计划', category: '规划', difficulty: 1, estimatedTime: 15, priority: 4 },
+          { title: '晨练运动', category: '健康', difficulty: 3, estimatedTime: 45, priority: 3 }
+        ],
+        afternoon: [
+          { title: '技能学习', category: '学习', difficulty: 4, estimatedTime: 60, priority: 3 },
+          { title: '整理工作空间', category: '生活', difficulty: 2, estimatedTime: 20, priority: 2 },
+          { title: '社交联系', category: '社交', difficulty: 2, estimatedTime: 30, priority: 2 }
+        ],
+        evening: [
+          { title: '反思总结', category: '成长', difficulty: 2, estimatedTime: 20, priority: 4 },
+          { title: '放松冥想', category: '健康', difficulty: 1, estimatedTime: 15, priority: 3 },
+          { title: '准备明日', category: '规划', difficulty: 1, estimatedTime: 10, priority: 3 }
+        ],
+        weekend: [
+          { title: '深度学习项目', category: '学习', difficulty: 5, estimatedTime: 120, priority: 4 },
+          { title: '户外活动', category: '健康', difficulty: 3, estimatedTime: 90, priority: 3 },
+          { title: '家庭时间', category: '生活', difficulty: 1, estimatedTime: 60, priority: 4 }
+        ]
+      };
+
+      // 根据时间选择合适的任务模板
+      let selectedTemplates = [];
+      if (dayOfWeek === 0 || dayOfWeek === 6) { // 周末
+        selectedTemplates = taskTemplates.weekend;
+      } else if (currentHour < 12) { // 上午
+        selectedTemplates = taskTemplates.morning;
+      } else if (currentHour < 18) { // 下午
+        selectedTemplates = taskTemplates.afternoon;
+      } else { // 晚上
+        selectedTemplates = taskTemplates.evening;
+      }
+
+      // 根据用户属性调整任务
+      selectedTemplates.forEach((template, index) => {
+        if (index >= 3) return; // 最多3个任务
+
+        const task = {
+          id: `local_${Date.now()}_${index}`,
+          title: template.title,
+          description: this.generateTaskDescription(template),
+          category: template.category,
+          difficulty: template.difficulty,
+          estimatedTime: template.estimatedTime,
+          priority: template.priority,
+          expectedBenefits: this.generateExpectedBenefits(template.category),
+          source: 'local_algorithm',
+          generatedAt: new Date().toISOString(),
+          estimatedReward: this.calculateReward(template.difficulty, template.estimatedTime),
+          personalizedReason: this.generatePersonalizedReason(template, emotionalState)
+        };
+
+        recommendations.push(task);
+      });
+
+      console.log('✅ 本地智能算法生成任务推荐成功:', recommendations.length, '个任务');
+      return recommendations;
+
+    } catch (error) {
+      console.error('❌ 本地智能算法失败:', error);
+
+      // 返回基础任务作为最后的降级方案
+      return [{
+        id: `fallback_${Date.now()}`,
+        title: '制定今日目标',
+        description: '花几分钟时间思考并写下今天想要完成的3件重要事情',
+        category: '规划',
+        difficulty: 1,
+        estimatedTime: 10,
+        priority: 4,
+        expectedBenefits: '提升专注力和执行力',
+        source: 'fallback',
+        generatedAt: new Date().toISOString(),
+        estimatedReward: { experience: 20, coins: 5 },
+        personalizedReason: '良好的规划是成功的开始'
+      }];
+    }
+  }
+
+  /**
+   * 生成任务描述
+   */
+  generateTaskDescription(template) {
+    const descriptions = {
+      '晨间阅读': '选择一本有益的书籍，专注阅读30分钟，记录感想',
+      '制定今日计划': '列出今天的重要任务，按优先级排序，制定时间安排',
+      '晨练运动': '进行适度的晨间运动，如慢跑、瑜伽或拉伸',
+      '技能学习': '学习一项新技能或深化现有技能，可以是编程、语言或其他',
+      '整理工作空间': '清理桌面，整理文件，创造一个舒适的工作环境',
+      '社交联系': '主动联系朋友或家人，维护重要的人际关系',
+      '反思总结': '回顾今天的收获和不足，思考明天的改进方向',
+      '放松冥想': '进行深呼吸或冥想练习，放松身心',
+      '准备明日': '整理明天需要的物品，预览明天的日程安排',
+      '深度学习项目': '投入时间进行深度学习或完成重要项目',
+      '户外活动': '到户外走走，享受自然，进行体育活动',
+      '家庭时间': '与家人共度美好时光，增进感情'
+    };
+
+    return descriptions[template.title] || '完成这个有意义的任务，提升自己';
+  }
+
+  /**
+   * 生成预期收益
+   */
+  generateExpectedBenefits(category) {
+    const benefits = {
+      '学习': '提升知识水平和认知能力',
+      '健康': '改善身体状况和精神状态',
+      '规划': '提高效率和目标达成率',
+      '生活': '改善生活质量和环境',
+      '社交': '增强人际关系和社交能力',
+      '成长': '促进自我反思和个人成长'
+    };
+
+    return benefits[category] || '提升个人综合能力';
+  }
+
+  /**
+   * 生成个性化原因
+   */
+  generatePersonalizedReason(template, emotionalState) {
+    const reasons = [
+      '根据你当前的状态，这个任务能帮助你获得成就感',
+      '这是一个适合你现在完成的任务',
+      '完成这个任务将对你的成长很有帮助',
+      '这个任务符合你的当前需求',
+      '建议你尝试这个任务来提升自己'
+    ];
+
+    return reasons[Math.floor(Math.random() * reasons.length)];
   }
 
   /**

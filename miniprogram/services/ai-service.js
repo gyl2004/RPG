@@ -7,8 +7,7 @@ class AIService {
 
     // 引用DeepSeek AI服务
     try {
-      const DeepSeekAIService = require('./deepseek-ai-service.js');
-      this.deepSeekService = new DeepSeekAIService();
+      this.deepSeekService = require('./deepseek-ai-service.js');
     } catch (error) {
       console.error('无法加载DeepSeek AI服务:', error);
       this.deepSeekService = null;
@@ -261,6 +260,16 @@ class AIService {
    */
   async generateAIRandomEvent(userProfile, userStats, emotionalState) {
     try {
+      // 检查DeepSeek服务是否可用
+      if (!this.deepSeekService) {
+        console.warn('DeepSeek AI服务不可用，使用本地降级方案');
+        return {
+          success: true,
+          event: this.generateFallbackRandomEvent(userProfile, userStats),
+          source: 'local_fallback'
+        };
+      }
+
       const prompt = this.buildRandomEventPrompt(userProfile, userStats, emotionalState);
 
       const response = await this.callDeepSeek([{ role: 'user', content: prompt }]);
@@ -282,10 +291,12 @@ class AIService {
       throw new Error('AI响应格式无效');
     } catch (error) {
       console.error('AI生成随机事件失败:', error);
+      // 降级到本地方案
       return {
-        success: false,
-        error: error.message,
-        fallback: this.generateFallbackRandomEvent(userProfile, userStats)
+        success: true,
+        event: this.generateFallbackRandomEvent(userProfile, userStats),
+        source: 'local_fallback',
+        originalError: error.message
       };
     }
   }
@@ -441,6 +452,11 @@ class AIService {
     }
     
     try {
+      // 检查deepSeekService是否有callDeepSeek方法
+      if (typeof this.deepSeekService.callDeepSeek !== 'function') {
+        throw new Error('DeepSeek AI服务方法不可用');
+      }
+      
       const response = await this.deepSeekService.callDeepSeek(messages, options);
       return response;
     } catch (error) {

@@ -142,16 +142,6 @@ class HabitService {
       wx.setStorageSync('userHabits', habits);
       console.log('习惯已保存到存储');
 
-      // 更新习惯创建统计
-      try {
-        const rewardService = require('./reward-service.js');
-        const userRewards = rewardService.getUserRewards();
-        userRewards.statistics.totalHabitsCreated++;
-        rewardService.saveUserRewards(userRewards);
-      } catch (error) {
-        console.error('更新习惯统计失败:', error);
-      }
-
       return {
         success: true,
         habit: habit,
@@ -199,6 +189,27 @@ class HabitService {
   }
 
   /**
+   * 获取习惯分类信息
+   */
+  getHabitCategories() {
+    return this.habitCategories;
+  }
+
+  /**
+   * 获取习惯频率信息
+   */
+  getHabitFrequencies() {
+    return this.habitFrequencies;
+  }
+
+  /**
+   * 获取习惯状态信息
+   */
+  getHabitStatuses() {
+    return this.habitStatuses;
+  }
+
+  /**
    * 习惯打卡
    */
   checkInHabit(habitId, checkInData = {}) {
@@ -240,22 +251,21 @@ class HabitService {
       // 更新连续天数
       this.updateStreak(habit);
 
-      // 给予习惯打卡奖励
+      // 给予习惯打卡奖励到角色系统（不使用await）
       try {
-        const rewardService = require('./reward-service.js');
+        const characterService = require('./character-service.js');
         const rewards = {
           coins: 10 + habit.currentStreak * 2, // 基础10金币 + 连续天数奖励
           experience: 5 + habit.currentStreak // 基础5经验 + 连续天数奖励
         };
-        rewardService.giveRewards(rewards);
-
-        // 更新统计数据
-        const userRewards = rewardService.getUserRewards();
-        userRewards.statistics.maxHabitStreak = Math.max(
-          userRewards.statistics.maxHabitStreak || 0,
-          habit.currentStreak
-        );
-        rewardService.saveUserRewards(userRewards);
+        
+        // 给予奖励（不等待结果）
+        if (rewards.experience) {
+          characterService.addExperience(rewards.experience);
+        }
+        if (rewards.coins) {
+          characterService.addCoins(rewards.coins);
+        }
 
         // 记录用户活动
         const userService = require('./user-service.js');
@@ -388,27 +398,6 @@ class HabitService {
         byCategory: {}
       };
     }
-  }
-
-  /**
-   * 获取习惯分类信息
-   */
-  getHabitCategories() {
-    return this.habitCategories;
-  }
-
-  /**
-   * 获取习惯频率信息
-   */
-  getHabitFrequencies() {
-    return this.habitFrequencies;
-  }
-
-  /**
-   * 获取习惯状态信息
-   */
-  getHabitStatuses() {
-    return this.habitStatuses;
   }
 
   /**

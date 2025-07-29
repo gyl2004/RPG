@@ -381,12 +381,6 @@ Page({
     });
   },
 
-  // 导航到奖励中心
-  navigateToRewards: function() {
-    wx.navigateTo({
-      url: '/pages/rewards/rewards'
-    });
-  },
 
   // 导航到社交页面
   navigateToSocial: function() {
@@ -399,6 +393,13 @@ Page({
   navigateToStory: function() {
     wx.navigateTo({
       url: '/pages/story/story'
+    });
+  },
+
+  // 导航到动态故事页面
+  navigateToDynamicStory: function() {
+    wx.navigateTo({
+      url: '/pages/dynamic-story/dynamic-story'
     });
   },
 
@@ -422,6 +423,13 @@ Page({
   navigateToDynamicStory: function() {
     wx.navigateTo({
       url: '/pages/dynamic-story/dynamic-story'
+    });
+  },
+
+  // 导航到设置页面
+  navigateToSettings: function() {
+    wx.navigateTo({
+      url: '/pages/settings/settings'
     });
   },
 
